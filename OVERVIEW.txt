@@ -8,8 +8,8 @@ modify the behaviour of the network under test. In addition, estimated RTT
 results may be misleading if the network handles active probe packets
 differently to regular IP packets. 
 
-In contrast, SPP provides frequently updated RTT estmates using IP traffic
-already present in the network. SPP estimates the RTT betwen two measurement
+In contrast, SPP provides frequently updated RTT estimates using IP traffic
+already present in the network. SPP estimates the RTT between two measurement
 points without requiring precise time synchronisation between each point. SPP
 accurately estimates the RTT experienced by an application's traffic without
 needing modifications to the application itself or the routers along the path.
