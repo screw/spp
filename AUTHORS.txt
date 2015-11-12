@@ -1,15 +1,14 @@
 SPP - Synthetic Packet Pairs - Authors & Maintainers
 
-SPP 0.3.1:
+SPP 0.1, 0.2, 0.3, 0.3.1:
+
+Amiel Heyde, Centre for Advanced Internet Architectures, Swinburne
+<amiel@swin.edu.au> 
 
 Grenville Armitage, Centre for Advanced Internet Architectures, Swinburne
 <garmitage@swin.edu.au>
   - project leadership
   - architectural advice
-
-Amiel Heyde, Centre for Advanced Internet Architectures, Swinburne
-<amiel@swin.edu.au> 
-  - wrote spp 0.1 and 0.2, 0.3
 
 SPP 0.3.2:
 
