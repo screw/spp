@@ -10,7 +10,7 @@ SPP - Synthetic Packet Pairs - 0.3.6 - Readme
         under test. In addition, estimated RTT results may be misleading if the
         network handles active probe packets differently to regular IP packets.
 
-        In contrast, Synthetic Packet Pairs (SPP [1]) provides frequently 
+        In contrast, Synthetic Packet Pairs (SPP [1][2]) provides frequently 
         updated RTT estimates using IP traffic already present in the network. 
         SPP estimates the RTT between two measurement points without requiring
         precise time synchronisation between each point. SPP estimates the RTT 
@@ -266,3 +266,11 @@ Packet Matching Options:
           "Minimally Intrusive Round Trip Time Measurements Using
           Synthetic Packet-Pairs," CAIA Technical Report 060707A, July 2006.
           http://caia.swin.edu.au/reports/060707A/CAIA-TR-060707A.pdf
+          
+   [2]    S. Zander, G. Armitage, "Minimally-Intrusive Frequent Round Trip
+          Time Measurements Using Synthetic Packet-Pairs - Extended Report",
+          CAIA Technical Report 130730A, July 2013
+          http://caia.swin.edu.au/reports/130730A/CAIA-TR-130730A.pdf
+          
+          
+          
