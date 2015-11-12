@@ -1,0 +1,17 @@
+SPP - Synthetic Packet Pairs - Acknowledgements
+
+Origins of SPP algorithm:
+
+  S. Zander, G. Armitage, T. Nguyen,L. Mark, B. Tyo
+  "Minimally Intrusive Round Trip Time Measurements Using
+  Synthetic Packet-Pairs," CAIA Technical Report 060707A, July 2006.
+  http://caia.swin.edu.au/reports/060707A/CAIA-TR-060707A.pdf
+
+  Initial design by Lutz Mark (Autonomic Networking Technologies,
+  Fraunhofer FOKUS, Germany, <mark@fokus.fraunhofer.de>) and
+  Sebastian Zander (Centre for Advanced Internet Architectures,
+  Swinburne University of Technology, <szander@swin.edu.au>)
+  
+Additional performance analysis of SPP in 2007:
+  
+  Nigel Williams, Centre for Advanced Internet Architectures, Swinburne

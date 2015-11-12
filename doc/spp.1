@@ -1,0 +1,235 @@
+.\" Process this file with
+.\" groff -man -Tascii spp.1
+.\"
+.TH SPP 1 "MAY 2013" FreeBSD "User Manuals"
+.SH NAME
+spp \- calculates round trip time (RTT) from pcap files or live traffic capture
+.SH SYNOPSIS
+.SS File processing:
+
+.B spp -a
+.I address 
+.B -A
+.I address
+.B -f 
+.I file
+.B -F 
+.I file
+.B [-#
+.I hashcode
+.B | -n 
+.I address
+.B | -N 
+.I address
+.B |-p|-c|-m|-b]
+
+.SS Live processing master:
+.B spp -a 
+.I address
+.B -A 
+.I address
+.B (-i
+.I interface
+.B | -r
+.I host 
+.B ) ( -I 
+.I interface
+.B | -R
+.I slave_host
+.B ) [-#
+.I hashcode
+.B |-g
+.I usec
+.B | -n 
+.I address
+.B | -N 
+.I address
+.B |-p|-c|-m|-b]
+
+.SS Remote slave:
+.B spp -a
+.I address
+.B -A
+.I address
+.B -s
+.I master_host
+.B -I
+.I interface
+.B [ -#
+.I hashcode
+.B | -g
+.I usec
+.B | -l 
+.I no.bytes
+.B | -t 
+.I seconds
+.B | -n 
+.I address
+.B | -N 
+.I address
+.B ]
+
+
+
+.SS Output:
+.B [pair count] timestamp rtt [spt]
+
+
+.SH DESCRIPTION
+.B spp
+provides frequently updated RTT
+estimates using IP traffic already present in the network. spp 
+estimates the RTT between two measurement points without
+requiring precise time synchronisation between points. spp 
+accurately estimates the RTT experienced by any application's
+traffic without needing modifications to the application itself or
+the routers along the path.
+
+spp requires a capture of traffic at both ends of the path that is to be measured. From these captures spp can create synthetic pairs from which RTT can be calculated. spp works with tcpdump/pcap files previously captured at two points on a network, or alternatively, live capture on local and/or remote interfaces may be used. 
+
+The
+.B reference point 
+is where the trip is considered to have started from, with the 
+.B monitor point 
+being the far end of the trip. To clarify, when using ping, you would execute the ping from the reference point and the ping target would be the monitor point.
+.SH OPTIONS
+.SS General Options:
+.IP -a 
+IP address near the reference point
+.IP -A 
+IP address near the monitor point
+.IP -n 
+NAT IP address near the reference point
+.IP -N 
+NAT IP address near the monitor point
+.IP -s master_address
+Put into slave mode and send to the master specified
+.IP -o
+Offset in seconds of clocks at the monitor point with respect to the reference point.
+.IP -d seconds
+Max difference of timestamps in seconds allowed between matching packets. 
+This value should be greater than expected RTT (plus any clock offset when not specifying a fixed offset with the -o option).. (Default: 60)
+.IP -G
+Maximum number of packets that will be searched to match a pair before giving up (Default: 10000(pcap file) or 500(live))
+.IP -v
+Verbosity Level (Default: 0)
+    Determines information that is displayed on the console.
+    The verbosity level is the total of the IDs of each required
+    detail as listed below: 
+        1 Queue Size
+        2 Thread Details
+        4 Pair Info
+        8 Record Info
+        16 Instance Info
+        32 Packet Info
+        64 RTT COUNT - "checksum"
+        128 Network Details
+        1024 Verbose Network Details
+
+.SS Source options:
+.IP -f 
+File to be read for the reference point (PCAP format)
+.IP -F 
+File to be read for the monitor point (PCAP format)
+.IP -i 
+Reference point live capture interface (Except for when acting as a slave - instead use -I)
+.IP -I 
+Monitor point live capture interface (Also used for reference point acting as a slave)
+.SS Network options:
+.IP -l
+Length of the timestamp field in bytes [1 - 4] (Default: 2)
+.IP -g
+Granularity of timestamps in microseconds (Default: 100)
+.IP -t
+Network update timeout - Maximum time in seconds between slave sending spp sample frames to the master (Default: 1)
+.SS Output options:
+.IP -p 
+Output 'Server Processing Times' (The time between matched packets seen at the monitor point)
+.IP -c 
+Output 'Pair Count' (Running total of pairs the program has generated)
+.IP -m 
+Calculate timestamps from monitor point clock rather than the reference point clock (Output timestamps are the average of the packet's timestamps that were combined to make the pair)
+.IP -b
+Set the timestamp to the time that the first packet of the pair was first seen. (This is useful when comparing spp output to the raw trace files).
+.SS Packet Matching Options:        
+.IP -# code
+The # option maybe used to set which fields are used in the packet matching process (Default: 63).
+        The value of <code> is the total of all the required field IDs as listed below:
+        IP fields:
+                        1 Source Address
+                        2 Destination Address
+                        4 Protocol
+                        8 Identification
+        TCP/UDP fields:
+                        16 Source Port
+                        32 Destination Port
+        TCP fields:
+                        64 Sequence Number
+                        128 Acknowledgement Number
+                        256 Data offset, flags, window size
+                        512 Checksum, urgent pointer
+        UDP Fields:
+                        1024 Length, checksum
+                        2048 Up to 12 bytes UDP data (limited by packet length)
+        Not UDP/TCP:
+                        4096 Up to 20 bytes after IP header (limited by packet length)
+
+NOTE: When NAT is use, source and destination IP address fields will be omitted from hashes automatically.
+
+.SH  EXAMPLES
+
+.SS 1. From pcap files
+
+The IP at the reference point is 10.0.0.1 and the IP at the monitor point is 10.0.0.2. The files /data/ref.pcap and /data/mon.pcap contain data captured at the reference and monitor points respectively. Note that the display of pair count and server processing times are also enabled:
+
+.B spp -f /data/ref.pcap -a 10.0.0.1 -F /data/mon.pcap -A 10.0.0.2 -s -c
+
+.SS 2.  Local live capture
+Processing RTT in rear realtime from two local interfaces. This would be useful in a lab environment when testing equipment or networks. There are two local interfaces (em0 and em1) with IP addresses 10.0.1.1 and 10.0.2.1 respectively. The reference point will be em0 (10.0.1.1).
+
+.B spp -i em0 -a 10.0.1.1 -I em1 -A 10.0.2.1
+
+.SS 3.  Local/Remote with in band hash transmission
+Processing RTT in near realtime from a local interface at the reference point and remote interface at the monitor point. This example uses 'in band' hash transmission.
+
+The master is running at the reference point and is capturing on the interface em0 (Interface address 10.0.0.1). The slave is running at the monitor point, capturing on the bge0 interface (Interface address 10.0.0.2).
+
+On the master:
+
+.B spp -i em0 -a 10.0.0.1 -R 10.0.0.2 -A 10.0.0.2
+
+On the slave:
+
+.B spp -s 10.0.0.1 -a 10.0.0.1 -I bge0 -A 10.0.0.2
+ 
+.SS 4. Local/Remote with out of band hash transmission
+Processing RTT in near realtime from a local interface at the reference point and remote interface at the monitor point. This example uses 'out of band' hash transmission.
+
+This is the same as the previous example except that the hashes will be sent across a separate network to that which is being measured. The interfaces to this network have IP addresses of 192.168.0.1 and 192.168.0.2 at the reference and monitor points respectively.
+
+On the master:
+
+.B spp -i em0 -a 10.0.0.1 -R 192.168.0.2 -A 10.0.0.2
+
+On the slave:
+
+.B spp -s 192.168.0.1 -a 10.0.0.1 -I bge0 -A 10.0.0.2
+
+.SS 5. From files with NAT
+The IP at the reference point is 10.0.0.1 and the IP at the monitor point is 136.0.0.2. The files /data/ref.pcap and /data/mon.pcap contain data captured at the reference and monitor points respectively. The reference point is behind NAT.
+To the outside world, it appears to be 136.0.0.1
+
+.B spp -f /data/ref.pcap -a 10.0.0.1 -n 136.0.0.1 -F /data/mon.pcap -A 136.0.0.2
+
+.SH BUGS
+Live remote capture has not been tested much and may have bugs.
+.SH AUTHOR
+Amiel Heyde <amiel at swin dot edu dot au> Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia
+
+.SH CONTRIBUTORS
+Software designed in collaboration with Grenville Armitage <garmitage at swin dot edu dot au> Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia 
+.P
+Original implementation extended and revised by David Hayes <dahayes at swin dot edu dot au>, Atwin O. Calchand <acalchand at swin dot edu dot au>, Christopher Holman, Sebastian Zander <szander at swin dot edu dot au>, Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia
+.SH "SEE ALSO"
+.BR pcap (3),
+.BR tcpdump (8)

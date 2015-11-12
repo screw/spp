@@ -1,0 +1,18 @@
+SPP - Synthetic Packet Pairs - Overview
+
+Regular and frequent measurement of round trip time (RTT) between points on the 
+Internet is becoming increasingly important for a range of highly interactive 
+real-time applications. Active probing techniques are possible but problematic 
+The extra packet traffic imposed by active probes along a network path can
+modify the behaviour of the network under test. In addition, estimated RTT
+results may be misleading if the network handles active probe packets
+differently to regular IP packets. 
+
+In contrast, SPP provides frequently updated RTT estmates using IP traffic
+already present in the network. SPP estimates the RTT betwen two measurement
+points without requiring precise time synchronisation between each point. SPP
+accurately estimates the RTT experienced by an application's traffic without
+needing modifications to the application itself or the routers along the path.
+In addition, SPP works with applications that do not exhibit symmetric
+client-server packet exchanges (such as many online multiplayer games) and
+applications generating IP multicast traffic.

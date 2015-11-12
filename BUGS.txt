@@ -1,0 +1,9 @@
+- Remote capture has not received much testing
+- Endian problems with remote capturing and trace files
+  - Probably ntohs/ntohl missing in SFF code
+  - pcap always stores in host byte order 
+    -> need command line argument to change endianess
+- There are several functions that expect struct in_addr *,
+  but variables are all in_addr_t, which we cast to 
+  struct in_addr. Works on tested OS, but may cause
+  problems on other OS and may cause issues in future. 

@@ -1,0 +1,30 @@
+SPP - Synthetic Packet Pairs - 0.3.6 - Installation
+
+  REQUIREMENTS
+
+    FreeBSD 6, 7, 8, 9, 10 
+	- Confirmed to compile and run successfully under 
+          6.2-RELEASE, 7.0-RELEASE, 8.1-RELEASE, 9.0-RELEASE,
+          10.1-RELEASE
+	- Expected to run on later versions
+        - Tested on 64-bit PC-BSD 8.1
+
+    Linux
+	- Confirmed to compile and run successfully under 
+          openSUSE 12.2, 12.3 (x86_64)
+
+    Libraries 
+	- pcap library and header files are required
+          - Tested with libpcap 0.9.4, 0.9.8, 1.0.0, 1.2.1
+        - POSIX thread (pthread) support is required
+    	  - Linked with -pthread
+
+  BUILDING & INSTALLING
+
+	1. Type 'make' to build SPP
+	2. Type 'make install' to install SPP to 
+            /usr/local/bin
+	   and the SPP man page to
+            /usr/local/man
+
+	Note:  You need to be root to install SPP.

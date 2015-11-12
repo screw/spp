@@ -1,0 +1,47 @@
+Version 0.3.6
+- Fixed bug that caused SPP to fail on FreeBSD 10.1
+- Fixed a number of potential issues / compiler warnings
+
+Version 0.3.5
+- Fixed copyright notice
+
+Version 0.3.4
+- Fixed bug that stopped processing before the end of traces was reached
+- Fixed bug that caused the output of negative timestamps (instead of zero timestamps)
+- Fixed bug that caused hang in live mode after pressing ctrl-c on Linux
+- Updated makefile and man page
+
+Version 0.3.3
+- Fixed deadlock scenario(s)
+- Fixed incorrect timestamps for times with odd seconds value
+- Fixed pthread mutex bug
+- Added option to change number of packets searched before giving up (and increased default value)
+- Added missing TAILQ macros for Linux compatibility
+- Added more optional fields for packet ID computation
+
+Version 0.3.2
+- Fixed live capture
+- Updated man page and documentation
+
+Version 0.3.1
+- Fixed bugs that would cause crashes on 64bit systems
+
+Version 0.3.0
+- Added support for NAT (Thanks to David Hayes)
+- Bug fix 
+  (Previously when working with large files, it was possible that a large
+  number of measurements would be missing due to incorrect memory management.)  
+
+Version 0.2.0
+- Multiple hash lengths
+- Multiple granularity settings for remote timestamps
+- Maximum time between remote updates limit
+
+Version 0.1.7
+- Live interface capture
+- Variable hashing
+- Proof of concept remote capture
+
+Version 0.1.6
+- First usable multithreading version
+- Calculates hashes on id, protocol, src dst addresses.

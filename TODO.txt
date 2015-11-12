@@ -1,0 +1,9 @@
+Future work for SPP 0.4.0
+- Add support for arbitrary pcap filter strings
+- Further testing and stability improvements 
+- Improve timeouts / T Delta functionality
+- SPP Master should monitor heartbeat from slave
+- 16 and 24 bit hashes option
+- Auto adjusting timestamp length
+- IPv6 Handling
+- Accept FQDNs and not only IPs for command line parameters (e.g. -a, -A)

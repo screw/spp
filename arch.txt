@@ -1,0 +1,74 @@
+
+
+
+SPP works by listening at two points, referred to as REF and MON throughout the
+code, and capturing an OUT and an IN packet at each. It timestamps both packets
+at each point, and calculates the total time the packets spent in flight.
+
+
+
+    +--------+  Pkt 1       +--------+
+    |        |+------------>|        |
+    |        |    OUT       |        |
+    |        |              |        |
+    |        |              |        |
+    |  REF   |              |  MON   |
+    |        |              |        |
+    |        |              |        |
+    |        |              |        |
+    |        |    IN        |        |
+    |        |<------------+|        |
+    +--------+  Pkt 2       +--------+
+
+       Fig. 1 Directions of packets
+
+SPP operates in three modes:
+ * Live: compare between two interfaces on the one PC
+ * Remote: compare between a local interface and an interface on a
+           remote PC.
+ * File: read a pair of PCAP files, captured from two different 
+         points on the network. 
+
+SPP uses the PCAP library to read network data. It initialises either the live
+interface reader or the file reader according to command line arguments, inside
+the mpoint_load() function, which is called from processArgs().
+
+mpoint_start() is then called, which constructs the PCAP filter and starts the
+threads. From there, createInstances() is called, which then tells the PCAP 
+interface to call createInstance() on each packet. 
+
+createInstance() queues each packet on to a TAILQ for processing by another
+thread. There is a TAILQ for each direction and observation point (stored in
+an mpoint struct for each observation point).
+
+
+The main thread loops createPair() which calls createRecord() which calls 
+searchInstances(), which searches the instances created in CreateInstance();
+
+=== Packet matching ===
+instance.c: getHash() generates the CRC32 of a parts of a packet. This is used
+as the packetID, and is the sole basis for matching packet pairs. 
+
+createInstance() will getHash, then put the hash and timestamp on to a queue.
+
+searchInstances() will search both the MON and REF queues for matching packets.
+If the timestamp difference exceeds  delta_t_max, or more than max_packet_gap
+packets are searched, it will give up and move on to another packet to try and
+match.
+
+=== Common terminology ===
+
+REF: One of the monitoring points. 
+MON: The other monitoring point  (MON and REF are crap names. Monitor and reference? Confusing)
+mpoint: monitoring point. Ie, one of REF or MON
+        Used in function and struct names. Eg, "mpoint_start" initialises the 
+        pcap stuff for a monitoring point. monitor_point_t is the struct for 
+        an mpoint. 
+IN: a packet flowing from MON to REF. Inbound to REF.
+OUT: a packet flowing from REF to MON. Outbound from REF.
+
+
+=== record.c ===
+
+createRecord() will search both REF and MON lists of a given direction to find
+both records of a packet. It will search 
