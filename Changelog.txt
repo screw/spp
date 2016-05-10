@@ -1,3 +1,7 @@
+Version 0.3.7
+- Fixed threading bug that causes segfault with newer pthread lib on Linux
+- Directory bin is now created during make (if it doesn't exists)
+
 Version 0.3.6
 - Fixed bug that caused SPP to fail on FreeBSD 10.1
 - Fixed a number of potential issues / compiler warnings

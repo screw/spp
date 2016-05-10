@@ -523,7 +523,7 @@ PUBLIC void removeOldInstances(monitor_point_t * mpoint, direction_t direction, 
       removeInstance(ins, mpoint, direction);
     }
     else {
-      break;                    // No point searching any more as items are in chronological order
+      return;                    // No point searching any more as items are in chronological order
     }
     pthread_mutex_lock(&mpoint->q_mutex[direction]);
   }

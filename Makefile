@@ -73,6 +73,7 @@ all: $(PROGRAM)
 	    $(CC) $(CFLAGS) -c $< -o $@
 
 $(PROGRAM): $(OBJECTS)
+	    mkdir -p bin
 	    $(CC) -o $@ $(OBJECTS) $(CFLAGS) $(LDFLAGS) $(SLIBS) 
 
 clean:
