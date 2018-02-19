@@ -291,7 +291,7 @@ void displayUsageInfo(){
                 printf("\t-n Natted IP address of the reference point\n");
                 printf("\t-N Natted IP address of the monitor point\n");
                 printf("\t-s Put into slave mode and send SSF to specified host\n");
-                printf("\t-v Verbosity Level - see Readme\n");
+                printf("\t-v Verbosity Level - see man page\n");
                 printf("\t-d T Delta Maximum (seconds) - see Readme (default: %d)\n", DELTA_T_MAX);
                 printf("\t-o Offset in seconds of the monitor point with respect to the reference point\n");
                 printf("\t-G Maximum number of packets that will be searched to match a pair before giving up (default: %d)\n\n", MAX_PACKET_GAP);

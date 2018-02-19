@@ -102,7 +102,7 @@ SPP - Synthetic Packet Pairs - 0.3.6 - Readme
         -n Natted IP address of the reference point
         -N Natted IP address of the monitor point
         -s Put into slave mode and send SSF to specified host
-        -v Verbosity Level - see Readme
+        -v Verbosity Level - see man page
         -d T Delta Maximum (seconds) - see Readme (default: 60)
         -o Offset in seconds of the monitor point with respect to the reference point
 	-G Search interval in number of packets (default: 10000(file)/500(live))
