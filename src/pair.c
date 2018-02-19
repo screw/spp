@@ -130,12 +130,13 @@ PRIVATE pair_t * assemblePair(record_t * record[2]) {
            pair_no);
     printf("*----------------------------------------------------------------\n");
   }
-    if(options & output_pair_count) printf("%6u ", pair_no);
-    printf("%lld.%06lld %lld.%06lld",  (signed long long) pair->ts.tv_sec, (signed long long) pair->ts.tv_usec, 
-           (signed long long) pair->rtt.tv_sec, (signed long long) pair->rtt.tv_usec);
-    if(options & output_spt) printf(" %lld.%06lld", (signed long long) pair->spt.tv_sec, 
-                                    (signed long long) pair->spt.tv_usec);
-    printf("\n");
+  
+  if(options & output_pair_count) printf("%6u ", pair_no);
+  printf("%lld.%06lld %lld.%06lld",  (signed long long) pair->ts.tv_sec, (signed long long) pair->ts.tv_usec, 
+	  (signed long long) pair->rtt.tv_sec, (signed long long) pair->rtt.tv_usec);
+  if(options & output_spt) printf(" %lld.%06lld", (signed long long) pair->spt.tv_sec, 
+				  (signed long long) pair->spt.tv_usec);
+  printf("\n");
  
   return pair;
 }
