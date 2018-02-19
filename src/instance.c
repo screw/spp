@@ -377,6 +377,10 @@ PUBLIC void createInstance(u_char *args, const struct pcap_pkthdr *pcap_hdr, con
 		      //Changed by David Hayes to reflect the pcap man page
                       ip_hdr = (struct ip *)(pkt + 16);
                       break;
+    case DLT_PPP:
+                      // Added garmitage@ to support PPP-encapsulated frames
+                      ip_hdr = (struct ip *)(pkt + 2);
+                      break;
     default:
                       printf("DataLink type not supported\n");
                       exit(EXIT_FAILURE);
