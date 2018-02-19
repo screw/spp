@@ -405,8 +405,8 @@ PUBLIC void createInstance(u_char *args, const struct pcap_pkthdr *pcap_hdr, con
 
   if(verbosity & 32) {
     char addr_string[2][16];
-    strncpy(addr_string[0], inet_ntoa(*(struct in_addr *)&src_addr), 16);
-    strncpy(addr_string[1], inet_ntoa(*(struct in_addr *)&dst_addr), 16);
+    strncpy(addr_string[0], inet_ntoa(*(struct in_addr *)&src_addr), 16); // inet_ntoa() not always thread-safe?
+    strncpy(addr_string[1], inet_ntoa(*(struct in_addr *)&dst_addr), 16); // inet_ntoa() not always thread-safe?
     printf("INFO: Next packet from monitor point %u: src %s, dst %s\n", 
            mpoint->id, addr_string[0], addr_string[1]);
   }
