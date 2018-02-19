@@ -131,7 +131,7 @@ PUBLIC void mpoint_load(monitor_point_t * mpoint, const mp_type_t type, const ch
   mpoint->finished = 0;
   if(mpoint->type != remote) {
       mpoint->datalink_type = pcap_datalink(mpoint->dev);
-        if(verbosity & 32) printf("Datalink type: %d\n", mpoint->datalink_type);
+        if(verbosity & 32) printf("Monitor point id %d has datalink type: %d\n", mpoint->id, mpoint->datalink_type);
   }
 }
 
