@@ -223,12 +223,22 @@ PRIVATE instance_t* assembleInstance(const struct pcap_pkthdr *pcap_hdr, const s
 /*
  * Creates hash of a packet that is used for the pkt_id field. 
  *
- * The pkt_id is used to determine if a packet matches. At the moment, the only default 
- * unique field used is the Identification field. Note that this only has 65,536 possible
- * values, so if you have multiple connections in the one PCAP file, there's a non-zero
- * chance that you'll get a collision.
- *
- * XXX add ip length as option?
+ * The pkt_id is crucial for determining whether a packet seen at REF
+ * has also been seen at MON. We rely on hashing together one or more fields
+ * that are expected to be vary from packet to packet but also be invariant along
+ * the path between REF and MON. The global 'hash_fields' holds a bitmask
+ * indicating which fields should be included in the hash calculation.
+ * 
+ * In SPP <= 0.3.6 we assumed IP.ID (Identification) field would be non-zero and
+ * unique per packet emitted by a given source (at least for time periods longer than
+ * a handful of RTTs). However, RFC 6864 (Feb 2013) officially deprecated this use of
+ * IP.ID field, and it is now a largely unreliable mechanism for disambiguating packets
+ * that might otherwise look the same based on other header fields.
+ * 
+ * Some other fields may or may not be invariant along a path. Certain middleboxes have
+ * been observed in the wild actually twiddling with the raw TCP sequence numbers,
+ * ensuring they wont match between REF and MON.
+ * 
  * */
 PUBLIC uint32_t getHash(const struct ip *ip_hdr) {
 
