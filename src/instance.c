@@ -306,6 +306,17 @@ PUBLIC uint32_t getHash(const struct ip *ip_hdr) {
 	memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + tcp_data_start), hash_bytes);
 	hash_offset += hash_bytes;
       }
+      if(hash_fields & 16384) {           // Add up to 12 bytes of TCP options (TODO: parse and use only TSval and TSecr)
+	unsigned short options_len = tcp_hdr->th_off * 4 - 20;
+	unsigned short hash_bytes = 12;
+	if (options_len > 0) { // There are options, so off we go
+	  if (options_len < hash_bytes) {
+		hash_bytes = options_len;
+	  }
+	  memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 20), hash_bytes);
+	  hash_offset += hash_bytes;
+	}
+      }
 
     }
     else {  //Must be UDP
@@ -321,7 +332,7 @@ PUBLIC uint32_t getHash(const struct ip *ip_hdr) {
 	}
 	memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 8), hash_bytes);	      	
 	hash_offset += hash_bytes;
-      }	       
+      }
 
     }
   } else {
