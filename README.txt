@@ -1,4 +1,4 @@
-SPP - Synthetic Packet Pairs - 0.3.6 - Readme
+SPP - Synthetic Packet Pairs - 0.3.X - Readme
 
   1. Overview
 
@@ -124,7 +124,7 @@ SPP - Synthetic Packet Pairs - 0.3.6 - Readme
         -m Calculate timestamps from monitor point clock
         -b Use the timestamp of the first packet in the pair for the pair timestamp
 
-Packet Matching Options:
+        Packet Matching Options:
         -# <code> (default: 63)
         The # option maybe used to set which fields are used in the packet matching process.
         The value of <code> is the total of all the required field IDs as listed below:
@@ -136,11 +136,13 @@ Packet Matching Options:
         TCP/UDP fields:
                         16 Source Port
                         32 Destination Port
-	TCP fields:
+        TCP fields:
                         64 Sequence Number
                         128 Acknowledgement Number
                         256 Data offset, flags, window size
                         512 Checksum, urgent pointer
+                        8192 Up to 12 bytes of TCP payload (limited by packet length)
+                        16384 Up to 12 bytes of TCP Options (if present)
         UDP Fields:
                         1024 Length, checksum
                         2048 Up to 12 bytes UDP data (limited by packet length)
