@@ -399,8 +399,12 @@ PUBLIC void createInstance(u_char *args, const struct pcap_pkthdr *pcap_hdr, con
                       link_hdr_len = 16;
                       break;
     case DLT_PPP:
-                      // Added garmitage@ to support PPP-encapsulated frames
-                      link_hdr_len = 2;
+                      // Support PPP-encapsulated frames with/without HDLC encaps
+		      if ((*pkt == 0xFF) && (*(pkt+1) == 0x03)) {
+			link_hdr_len = 4;
+		      } else {
+			link_hdr_len = 2;
+		      }
                       break;
     default:
                       printf("DataLink type not supported\n");
