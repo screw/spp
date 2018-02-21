@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" groff -man -Tascii spp.1
 .\"
-.TH SPP 1 "MAY 2013" FreeBSD "User Manuals"
+.TH SPP 1 "FEB 2018" FreeBSD "User Manuals"
 .SH NAME
 spp \- calculates round trip time (RTT) from pcap files or live traffic capture
 .SH SYNOPSIS
@@ -154,25 +154,32 @@ Set the timestamp to the time that the first packet of the pair was first seen. 
 .SS Packet Matching Options:        
 .IP -# code
 The # option maybe used to set which fields are used in the packet matching process (Default: 63).
-        The value of <code> is the total of all the required field IDs as listed below:
-        IP fields:
-                        1 Source Address
-                        2 Destination Address
-                        4 Protocol
-                        8 Identification
-        TCP/UDP fields:
-                        16 Source Port
-                        32 Destination Port
-        TCP fields:
-                        64 Sequence Number
-                        128 Acknowledgement Number
-                        256 Data offset, flags, window size
-                        512 Checksum, urgent pointer
-        UDP Fields:
-                        1024 Length, checksum
-                        2048 Up to 12 bytes UDP data (limited by packet length)
-        Not UDP/TCP:
-                        4096 Up to 20 bytes after IP header (limited by packet length)
+The value of <code> is the total of all the required field IDs as listed below:
+
+IP fields:
+  1 Source Address
+  2 Destination Address
+  4 Protocol
+  8 Identification
+      
+TCP/UDP fields:
+  16 Source Port
+  32 Destination Port
+      
+TCP fields:
+  64 Sequence Number
+  128 Acknowledgement Number
+  256 Data offset, flags, window size
+  512 Checksum, urgent pointer
+  8192 Up to 12 bytes of TCP payload (limited by packet length)
+  16384 Up to 12 bytes of TCP Options (if present)
+      
+UDP Fields:
+  1024 Length, checksum
+  2048 Up to 12 bytes UDP data (limited by packet length)
+      
+Not UDP/TCP:
+  4096 Up to 20 bytes after IP header (limited by packet length)
 
 NOTE: When NAT is use, source and destination IP address fields will be omitted from hashes automatically.
 
