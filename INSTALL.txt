@@ -2,10 +2,10 @@ SPP - Synthetic Packet Pairs - 0.3.6 - Installation
 
   REQUIREMENTS
 
-    FreeBSD 6, 7, 8, 9, 10 
+    FreeBSD
 	- Confirmed to compile and run successfully under 
           6.2-RELEASE, 7.0-RELEASE, 8.1-RELEASE, 9.0-RELEASE,
-          10.1-RELEASE
+          10.1-RELEASE, 11.1-RELEASE
 	- Expected to run on later versions
         - Tested on 64-bit PC-BSD 8.1
 
