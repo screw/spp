@@ -250,54 +250,53 @@ PUBLIC uint32_t getHash(const struct ip *ip_hdr) {
  
   //printf("assembling\n");
   if (nat_addr[0] == 0 && nat_addr[1] == 0) {	// Do not include IP addresses in hash when running through NAT (This would cause no hashes to match)
-    if(hash_fields & 1) {
-      memcpy((void*)(hash_data + hash_offset), (void*)&ip_hdr->ip_src, sizeof(ip_hdr->ip_src));                 // Add Source address field
+    if(hash_fields & 1) {                 // Add Source address field
+      memcpy((void*)(hash_data + hash_offset), (void*)&ip_hdr->ip_src, sizeof(ip_hdr->ip_src));
       hash_offset += sizeof(ip_hdr->ip_src);
     }
-    if(hash_fields & 2) {
-      memcpy((void*)(hash_data + hash_offset), (void*)&ip_hdr->ip_dst, sizeof(ip_hdr->ip_dst));                 // Add Destination address field 
+    if(hash_fields & 2) {                 // Add Destination address field 
+      memcpy((void*)(hash_data + hash_offset), (void*)&ip_hdr->ip_dst, sizeof(ip_hdr->ip_dst));
       hash_offset += sizeof(ip_hdr->ip_dst);
     }
   }
-  if(hash_fields & 4) {
-    memcpy((void*)(hash_data + hash_offset), (void*)&ip_hdr->ip_p, sizeof(ip_hdr->ip_p));                     // Add Protocol
+  if(hash_fields & 4) {                   // Add Protocol
+    memcpy((void*)(hash_data + hash_offset), (void*)&ip_hdr->ip_p, sizeof(ip_hdr->ip_p));
     hash_offset += sizeof(ip_hdr->ip_p);
   }
-  if(hash_fields & 8) {
-    memcpy((void*)(hash_data + hash_offset), (void*)&ip_hdr->ip_id, sizeof(ip_hdr->ip_id));                   // Add Identification field
+  if(hash_fields & 8) {                   // Add Identification field
+    memcpy((void*)(hash_data + hash_offset), (void*)&ip_hdr->ip_id, sizeof(ip_hdr->ip_id));
     hash_offset += sizeof(ip_hdr->ip_id);
   }
 
 
   if(ip_hdr->ip_p == 6 || ip_hdr->ip_p == 17) {  //We have a TCP or UDP packet
-    if(hash_fields & 16) {
-      memcpy((void*)(hash_data + hash_offset), (void*)transport_hdr, 2);                                              // Add TCP/UDP src
+    if(hash_fields & 16) {                // Add TCP/UDP src
+      memcpy((void*)(hash_data + hash_offset), (void*)transport_hdr, 2);
       hash_offset += 2;
     }
-    if(hash_fields & 32) {
-      memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 2), 2);                                              // Add TCP/UDP dst
+    if(hash_fields & 32) {                // Add TCP/UDP dst
+      memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 2), 2);
      hash_offset += 2;
     }
 
     if(ip_hdr->ip_p == 6) {  //We have a TCP packet
-      if(hash_fields & 64) {
-        memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 4), 4);                                              // Add TCP Seq No
+      if(hash_fields & 64) {              // Add TCP Seq No
+        memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 4), 4);
         hash_offset += 4;
       }
-      if(hash_fields & 128) {
-        memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 8), 4);                                              // Add TCP Ack No
+      if(hash_fields & 128) {             // Add TCP Ack No
+        memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 8), 4);
         hash_offset += 4;
       }
-      if(hash_fields & 256) {
-	memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 12), 4);                                              // Add TCP data offset, flags, window size
+      if(hash_fields & 256) {             // Add TCP data offset, flags, window size
+	memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 12), 4);
 	hash_offset += 4;
       }
-      if(hash_fields & 512) {
-        memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 16), 4);                                              // Add TCP Checksum, urgent pointer
+      if(hash_fields & 512) {             // Add TCP Checksum, urgent pointer
+        memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 16), 4);
         hash_offset += 4;
       }
-      if(hash_fields & 8192) {
-	// Add up to first hash_bytes bytes of TCP payload
+      if(hash_fields & 8192) {            // Add up to first hash_bytes bytes of TCP payload
 	unsigned short hash_bytes = 12;
 	unsigned short tcp_data_start = tcp_hdr->th_off * 4;
 	unsigned short tcp_data_len = ntohs(ip_hdr->ip_len) - (ip_hdr->ip_hl * 4) - tcp_data_start;
@@ -310,30 +309,30 @@ PUBLIC uint32_t getHash(const struct ip *ip_hdr) {
 
     }
     else {  //Must be UDP
-      if(hash_fields & 1024) {
-        memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 4), 4);                                              // Add UDP length, checksum 
+      if(hash_fields & 1024) {             // Add UDP length, checksum 
+        memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 4), 4);
         hash_offset += 4;
       }
-      if(hash_fields & 2048) {
+      if(hash_fields & 2048) {             // Add UDP payload (up to 12 bytes)
 	unsigned short data_len = ntohs(*((unsigned short*)(transport_hdr + 4))) - 8;
 	unsigned short hash_bytes = 12;
 	if (data_len < hash_bytes) {
 		hash_bytes = data_len;
 	}
-	memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 8), hash_bytes);					// Add UDP payload (up to 12 bytes)	      	
+	memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 8), hash_bytes);	      	
 	hash_offset += hash_bytes;
       }	       
 
     }
   } else {
 	if(hash_fields & 4096) {
-		// If not TCP or UDP use up to first 20 bytes past IP header
+		// If not TCP or UDP add up to first 20 bytes past IP header
 		unsigned short ip_data_len = ntohs(ip_hdr->ip_len) - ip_hdr->ip_hl * 4;
 		unsigned short hash_bytes = 20;
 		if (ip_data_len < hash_bytes) {
 			hash_bytes = ip_data_len;
 		}
-		memcpy((void*)(hash_data + hash_offset), (void*)transport_hdr, hash_bytes);					// Add IP payload (up to 20 bytes)
+		memcpy((void*)(hash_data + hash_offset), (void*)transport_hdr, hash_bytes);
 		hash_offset += hash_bytes;
 	}
   }
