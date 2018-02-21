@@ -322,6 +322,7 @@ void displayUsageInfo(){
                 printf("\tTCP fields:\n\t\t\t64 Sequence Number\n\t\t\t128 Acknowledgement Number\n\t\t\t256 Data offset, flags, window size\n\t\t\t512 Checksum, urgent pointer\n");
                 printf("\tUDP Fields:\n\t\t\t1024 Length, checksum\n\t\t\t2048 Up to 12 bytes UDP data (limited by packet length)\n");
                 printf("\tNot UDP/TCP:\n\t\t\t4096 Up to 20 bytes after IP header (limited by packet length)\n");
+                printf("\tTCP payload:\n\t\t\t8192 Up to 12 bytes of TCP payload (limited by packet length)\n");
 
 		printf("\n");
 }

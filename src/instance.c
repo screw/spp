@@ -39,6 +39,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netinet/if_ether.h>
+#include <netinet/tcp.h>
 #include <pthread.h>
 #include <unistd.h>
 
@@ -245,6 +246,7 @@ PUBLIC uint32_t getHash(const struct ip *ip_hdr) {
   unsigned int hash_offset = 0;
   unsigned char hash_data[HASH_DATA_LENGTH + 1];
   u_char * transport_hdr = ((u_char *)ip_hdr + (ip_hdr->ip_hl * 4));
+  struct tcphdr *tcp_hdr = (struct tcphdr *)transport_hdr;
  
   //printf("assembling\n");
   if (nat_addr[0] == 0 && nat_addr[1] == 0) {	// Do not include IP addresses in hash when running through NAT (This would cause no hashes to match)
@@ -294,6 +296,18 @@ PUBLIC uint32_t getHash(const struct ip *ip_hdr) {
         memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 16), 4);                                              // Add TCP Checksum, urgent pointer
         hash_offset += 4;
       }
+      if(hash_fields & 8192) {
+	// Add up to first hash_bytes bytes of TCP payload
+	unsigned short hash_bytes = 12;
+	unsigned short tcp_data_start = tcp_hdr->th_off * 4;
+	unsigned short tcp_data_len = ntohs(ip_hdr->ip_len) - (ip_hdr->ip_hl * 4) - tcp_data_start;
+	if (tcp_data_len < hash_bytes) {
+		hash_bytes = tcp_data_len;
+	}
+	memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + tcp_data_start), hash_bytes);
+	hash_offset += hash_bytes;
+      }
+
     }
     else {  //Must be UDP
       if(hash_fields & 1024) {
@@ -358,6 +372,7 @@ PUBLIC void createInstance(u_char *args, const struct pcap_pkthdr *pcap_hdr, con
   struct ether_header * eth_hdr = (struct ether_header *)pkt;
   monitor_point_t * mpoint = (monitor_point_t *)args; 
   int pkt_err = 0;
+  int link_hdr_len = 0;
 
   if(finished)pthread_exit(NULL);                     // Shut this thread down if we have been told to finish
   
@@ -369,7 +384,7 @@ PUBLIC void createInstance(u_char *args, const struct pcap_pkthdr *pcap_hdr, con
                             if(verbosity & 32) printf("Skipping Ethernet frame not containing IPv4\n");
                         return;
                       }
-                      ip_hdr = (struct ip *)(pkt + sizeof(struct ether_header));
+                      link_hdr_len = sizeof(struct ether_header);
                       break;
     case DLT_LOOP:
     case DLT_NULL:                                    //printf("Found Null/Loop\n"); 
@@ -378,30 +393,34 @@ PUBLIC void createInstance(u_char *args, const struct pcap_pkthdr *pcap_hdr, con
                             if(verbosity & 32) printf("Skipping Null/Loopback frame not containing IPv4\n");
                         return;
                       }
-                      ip_hdr = (struct ip *)(pkt + 4);
+                      link_hdr_len = 4;
                       break;
     case DLT_LINUX_SLL:
-                      //printf("Found LinuxSLL\n");
-                      //ip_hdr = (struct ip *)(pkt + 2);
-		      
 		      //Changed by David Hayes to reflect the pcap man page
-                      ip_hdr = (struct ip *)(pkt + 16);
+                      link_hdr_len = 16;
                       break;
     case DLT_PPP:
                       // Added garmitage@ to support PPP-encapsulated frames
-                      ip_hdr = (struct ip *)(pkt + 2);
+                      link_hdr_len = 2;
                       break;
     default:
                       printf("DataLink type not supported\n");
                       exit(EXIT_FAILURE);
     }
 
+  ip_hdr = (struct ip *)(pkt + link_hdr_len);
+  
   if(ip_hdr->ip_v != 4){
     if(verbosity & 32) printf("INFO: Skipping Packet: not IPv4\n");
     pkt_err = 1;
   }
 
-
+  if(ip_hdr->ip_len == 0){
+    // Some instances of captured TSO'ed frames have been seen with ip_len=0,
+    // so re-construct a fake a lower-bound IP packet length based on how many bytes
+    // actually captured (may be used later during pkt_id generation)
+    ip_hdr->ip_len = htons(pcap_hdr->caplen - link_hdr_len);
+  }
 
   if(mpoint->byte_order_swapped){
     src_addr = ntohl(ip_hdr->ip_src.s_addr);   //TEST THIS?
