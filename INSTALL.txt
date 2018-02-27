@@ -1,4 +1,4 @@
-SPP - Synthetic Packet Pairs - 0.3.6 - Installation
+SPP - Synthetic Packet Pairs - 0.3.7 - Installation
 
   REQUIREMENTS
 

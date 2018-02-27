@@ -30,3 +30,10 @@ Sebastian Zander, Centre for Advanced Internet Architectures, Swinburne
   - Bug fixes
   - Linux support
   - Updated documentation
+
+SPP 0.3.7
+
+Sebastian Zander, Grenville Armitage
+  - Bug fixes
+  - Support for enhanced hashing and additional payloads
+  - Documentation updates

@@ -276,8 +276,8 @@ void sigintproc() {
   //exit(1);
 }
 void displayUsageInfo(){
-                printf("Synthetic Packet Pairing Tool - 0.3.6\n\n");
-                printf("Output: [pair count] timestamp rtt [spt]\n\n");
+                printf("Synthetic Packet Pairing Tool - 0.3.7\n\n");
+                printf("Output: [pair count] timestamp rtt [spt] [OWDref2mon OWDmon2ref]\n\n");
                 printf("Offline file processing usage:\n");
                 printf("\tspp -a <IP address> -A <IP address> -f <file>  -F <file>\n\t\t[ -# <hashcode> -p | -c | -m |  ]\n\n");
                 printf("Live measurement usage:\n");
@@ -314,7 +314,7 @@ void displayUsageInfo(){
                 printf("\t-c Output 'Pair Count' \n");
                 printf("\t-m Calculate timestamps from monitor point clock\n");
                 printf("\t-b Use the timestamp of the first packet in the pair for the pair timestamp\n");
-                printf("\t-O Append 'fake' (uncorrected) OWD in each direction to each RTT line\n\n");
+                printf("\t-O Append 'fake' (uncorrected) OWD in each direction to each RTT line, [OWDref2mon OWDmon2ref]\n\n");
 
                 printf("Packet Matching Options:\n");
                 printf("\t-# <code> (default: 63)\n");

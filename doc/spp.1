@@ -1,5 +1,8 @@
-.\" Process this file with
-.\" groff -man -Tascii spp.1
+.\" For ASCII with escape-sequences for bold text, process this file with:
+.\"     groff -man -Tascii spp.1
+.\" For ASCII with no escape-sequences, set the environment variable GROFF_NO_SGR,
+.\" then run:
+.\"  groff -man -Tascii -c -P -b spp.1
 .\"
 .TH SPP 1 "FEB 2018" FreeBSD "User Manuals"
 .SH NAME
@@ -72,7 +75,7 @@ spp \- calculates round trip time (RTT) from pcap files or live traffic capture
 
 
 .SS Output:
-.B [pair count] timestamp rtt [spt]
+.B [pair count] timestamp rtt [spt] [OWDref2mon OWDmon2ref]
 
 
 .SH DESCRIPTION
@@ -85,7 +88,7 @@ accurately estimates the RTT experienced by any application's
 traffic without needing modifications to the application itself or
 the routers along the path.
 
-spp requires a capture of traffic at both ends of the path that is to be measured. From these captures spp can create synthetic pairs from which RTT can be calculated. spp works with tcpdump/pcap files previously captured at two points on a network, or alternatively, live capture on local and/or remote interfaces may be used. 
+spp requires a capture of traffic at both ends of the path that is to be measured. From these captures spp can create synthetic pairs of packets from which RTT can be calculated. spp works with tcpdump/pcap files previously captured at two points on a network, or alternatively, live capture on local and/or remote interfaces may be used.
 
 The
 .B reference point 
@@ -152,7 +155,7 @@ Calculate timestamps from monitor point clock rather than the reference point cl
 .IP -b
 Set the timestamp to the time that the first packet of the pair was first seen. (This is useful when comparing spp output to the raw trace files).
 .IP -O
-Append 'fake' (uncorrected) OWD in each direction to each RTT line. The (unknown) clock offset between REF and MON is not taken into account, so this is only useful to track *relative* changes in OWD, not absolute OWD.
+Append 'fake' (uncorrected) OWD in each direction to each RTT line, [OWDref2mon OWDmon2ref]. The (unknown) clock offset between REF and MON is not taken into account, so this is only useful to track *relative* changes in OWD, not absolute OWD.
 .SS Packet Matching Options:        
 .IP -# code
 The # option maybe used to set which fields are used in the packet matching process (Default: 63).
@@ -238,7 +241,7 @@ Amiel Heyde <amiel at swin dot edu dot au> Centre for Advanced Internet Architec
 .SH CONTRIBUTORS
 Software designed in collaboration with Grenville Armitage <garmitage at swin dot edu dot au> Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia 
 .P
-Original implementation extended and revised by David Hayes <dahayes at swin dot edu dot au>, Atwin O. Calchand <acalchand at swin dot edu dot au>, Christopher Holman, Sebastian Zander <szander at swin dot edu dot au>, Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia
+Original implementation extended and revised by David Hayes <dahayes at swin dot edu dot au>, Atwin O. Calchand <acalchand at swin dot edu dot au>, Christopher Holman, Sebastian Zander <szander at swin dot edu dot au>, Grenville Armitage <garmitage at swin dot edu dot au>, Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia
 .SH "SEE ALSO"
 .BR pcap (3),
 .BR tcpdump (8)

@@ -92,7 +92,7 @@ install:
 #
 # Tars and gzip's the distribtion - use for development
 #
-DISTRONAME=spp-0.3.6
+DISTRONAME=spp-0.3.7
 
 distro:
 #Make a gzip archive with only the necessary files
