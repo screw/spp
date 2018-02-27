@@ -1,6 +1,14 @@
 Version 0.3.7
+- Added pointer to http://caia.swin.edu.au/reports/130730A/CAIA-TR-130730A.pdf
 - Fixed threading bug that causes segfault with newer pthread lib on Linux
 - Directory bin is now created during make (if it doesn't exists)
+- Added support for DLT_PPP frames in pcap files
+- Create fake "ip_len" if missing (observed in some TSO'ed frames)
+- Noted that IP.ID is no longer useful for disambiguating packets (RFC 6864)
+- Added "-# 8192" to hash across first 12 bytes of TCP payload
+- Added "-# 16384" to hash across all TCP Option bytes
+- Added -O option to print 'fake' (uncorrected) OWD in each direction
+- Various documentation tweaks
 
 Version 0.3.6
 - Fixed bug that caused SPP to fail on FreeBSD 10.1
