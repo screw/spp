@@ -135,7 +135,35 @@ PRIVATE pair_t * assemblePair(record_t * record[2]) {
   printf("%lld.%06lld %lld.%06lld",  (signed long long) pair->ts.tv_sec, (signed long long) pair->ts.tv_usec, 
 	  (signed long long) pair->rtt.tv_sec, (signed long long) pair->rtt.tv_usec);
   if(options & output_spt) printf(" %lld.%06lld", (signed long long) pair->spt.tv_sec, 
-				  (signed long long) pair->spt.tv_usec);
+                                  (signed long long) pair->spt.tv_usec);
+  if(options & output_fakeowd) {
+    // Output the 'fake' OWD in each direction, without correcting for REF and MON
+    // clocks being unsynchronised 
+    struct timeval fakeowd;
+    
+    // Calculate fake OWD of the OUTbound packet (OWDref2mon)
+    timeval_subtract(&fakeowd, &pair->rec[OUT]->ts[MON], &pair->rec[OUT]->ts[REF]); 
+    // Our implementation of timeval_subtract() is unable to return a "-0" in tv_sec,
+    // so if fakeowd.tv_sec is negative, recalculate the substraction in reverse
+    // and preced numeric with "-"
+    printf(" ");
+    if (fakeowd.tv_sec < 0) {
+      timeval_subtract(&fakeowd, &pair->rec[OUT]->ts[REF], &pair->rec[OUT]->ts[MON]);
+      printf("-");
+    }
+    printf("%lld.%06lld ", (signed long long) fakeowd.tv_sec, (signed long long) fakeowd.tv_usec);    
+    
+    // Calculate fake OWD of the INbound packet (OWDmon2ref)
+    timeval_subtract(&fakeowd, &pair->rec[IN]->ts[REF], &pair->rec[IN]->ts[MON]);
+    // As above, if fakeowd.tv_sec is negative, recalculate the substraction in reverse
+    // and preced numeric with "-"
+    if (fakeowd.tv_sec < 0) {
+      timeval_subtract(&fakeowd, &pair->rec[IN]->ts[MON], &pair->rec[IN]->ts[REF]);
+      printf("-");
+    }
+    printf("%lld.%06lld", (signed long long) fakeowd.tv_sec, (signed long long) fakeowd.tv_usec);
+    
+  }
   printf("\n");
  
   return pair;

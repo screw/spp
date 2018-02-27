@@ -130,7 +130,7 @@ int initialise() {
 void processArgs(int argc, char *argv[]){
   int user_set_max_packet_gap = 0;
   char c;
-  while ((c = getopt(argc, argv, "hg:o:d:v:t:l:G:s:a:A:n:N:f:F:i:I:r:R:#:pcmb")) != -1 ) {
+  while ((c = getopt(argc, argv, "hg:o:O:d:v:t:l:G:s:a:A:n:N:f:F:i:I:r:R:#:pcmb")) != -1 ) {
     switch (c) {
       case 'h': displayUsageInfo();
                 exit(0);
@@ -177,6 +177,8 @@ void processArgs(int argc, char *argv[]){
       case 'v': verbosity = atoi(optarg);
                 break;
       case 'o': sec_offset = atoi(optarg);
+                break;
+      case 'O': options |= output_fakeowd;
                 break;
       case '?':
              if (optopt == 'c')
@@ -310,8 +312,9 @@ void displayUsageInfo(){
                 printf("\nOutput options:\n");
                 printf("\t-p Output 'Server Processing Times'\n");
                 printf("\t-c Output 'Pair Count' \n");
-                printf("\t-m Calculate timestamps from monitor point clock\n\n");
-                printf("\t-b Use the timestamp of the first packet in the pair for the pair timestamp\n\n");
+                printf("\t-m Calculate timestamps from monitor point clock\n");
+                printf("\t-b Use the timestamp of the first packet in the pair for the pair timestamp\n");
+                printf("\t-O Append 'fake' (uncorrected) OWD in each direction to each RTT line\n\n");
 
                 printf("Packet Matching Options:\n");
                 printf("\t-# <code> (default: 63)\n");

@@ -63,7 +63,17 @@ typedef enum OPTIONS_TYPE {
      * packet timestamp. -b CLI flag.
      * */
     use_firstpkt_time = 32,  
-    run_slave = 256 
+    run_slave = 256,
+    
+    /*
+     * Append 'fake' (uncorrected) OWD in each direction to each RTT line, e.g.
+     *          [<paircnt>] <timestamp> <RTT> [<spt>] OWDref2mon OWDmon2ref
+     * Note: The OWD are uncorrected in that we make no adjustment for clock
+     * offsets between REF and MON. This option is useful to track *relative*
+     * changes in OWD in each direciton, rather than infer anything about absolute OWDs.
+     * */
+    output_fakeowd = 512
+    
 } options_t;
 
 
