@@ -63,7 +63,7 @@
 
 /* Maximum length of data from which to create ID hashes
  */
-#define HASH_DATA_LENGTH 50
+#define HASH_DATA_LENGTH 128
 
 /* Port used for network transmission
  */

@@ -322,7 +322,7 @@ void displayUsageInfo(){
                 printf("\tThe value of <code> is the total of all the required field IDs as listed below:\n");
                 printf("\tIP fields:\n\t\t\t1 Source Address\n\t\t\t2 Destination Address\n\t\t\t4 Protocol\n\t\t\t8 Identification\n");
                 printf("\tTCP/UDP fields:\n\t\t\t16 Source Port\n\t\t\t32 Destination Port\n");
-                printf("\tTCP fields:\n\t\t\t64 Sequence Number\n\t\t\t128 Acknowledgement Number\n\t\t\t256 Data offset, flags, window size\n\t\t\t512 Checksum, urgent pointer\n\t\t\t8192 Up to 12 bytes of TCP payload (limited by packet length)\n\t\t\t16384 Up to 12 bytes of TCP Options (if present)\n");
+                printf("\tTCP fields:\n\t\t\t64 Sequence Number\n\t\t\t128 Acknowledgement Number\n\t\t\t256 Data offset, flags, window size\n\t\t\t512 Checksum, urgent pointer\n\t\t\t8192 Up to 12 bytes of TCP payload (limited by packet length)\n\t\t\t16384 All TCP Options bytes (if present)\n");
                 printf("\tUDP Fields:\n\t\t\t1024 Length, checksum\n\t\t\t2048 Up to 12 bytes UDP data (limited by packet length)\n");
                 printf("\tNot UDP/TCP:\n\t\t\t4096 Up to 20 bytes after IP header (limited by packet length)\n");
 

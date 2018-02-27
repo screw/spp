@@ -306,13 +306,9 @@ PUBLIC uint32_t getHash(const struct ip *ip_hdr) {
 	memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + tcp_data_start), hash_bytes);
 	hash_offset += hash_bytes;
       }
-      if(hash_fields & 16384) {           // Add up to 12 bytes of TCP options (TODO: parse and use only TSval and TSecr)
-	unsigned short options_len = tcp_hdr->th_off * 4 - 20;
-	unsigned short hash_bytes = 12;
-	if (options_len > 0) { // There are options, so off we go
-	  if (options_len < hash_bytes) {
-		hash_bytes = options_len;
-	  }
+      if(hash_fields & 16384) {           // Hash across all TCP options bytes if present
+	unsigned short hash_bytes = tcp_hdr->th_off * 4 - 20; // Number of bytes of TCP options
+	if (hash_bytes > 0) { // There are options, so off we go
 	  memcpy((void*)(hash_data + hash_offset), (void*)(transport_hdr + 20), hash_bytes);
 	  hash_offset += hash_bytes;
 	}
