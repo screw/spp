@@ -151,6 +151,8 @@ Output 'Pair Count' (Running total of pairs the program has generated)
 Calculate timestamps from monitor point clock rather than the reference point clock (Output timestamps are the average of the packet's timestamps that were combined to make the pair)
 .IP -b
 Set the timestamp to the time that the first packet of the pair was first seen. (This is useful when comparing spp output to the raw trace files).
+.IP -O
+Append 'fake' (uncorrected) OWD in each direction to each RTT line. The (unknown) clock offset between REF and MON is not taken into account, so this is only useful to track *relative* changes in OWD, not absolute OWD.
 .SS Packet Matching Options:        
 .IP -# code
 The # option maybe used to set which fields are used in the packet matching process (Default: 63).
@@ -172,7 +174,7 @@ TCP fields:
   256 Data offset, flags, window size
   512 Checksum, urgent pointer
   8192 Up to 12 bytes of TCP payload (limited by packet length)
-  16384 Up to 12 bytes of TCP Options (if present)
+  16384 All TCP Options bytes (if present)
       
 UDP Fields:
   1024 Length, checksum
