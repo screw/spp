@@ -8,7 +8,7 @@ Version 0.3.7
 - Added "-# 8192" to hash across first 12 bytes of TCP payload
 - Added "-# 16384" to hash across all TCP Option bytes
 - Added -O option to print 'fake' (uncorrected) OWD in each direction
-- Various documentation tweaks
+- Various documentation tweaks (README and man page source)
 
 Version 0.3.6
 - Fixed bug that caused SPP to fail on FreeBSD 10.1

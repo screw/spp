@@ -23,31 +23,36 @@ SYNOPSIS
        -g _u_s_e_c | -l _n_o_._b_y_t_e_s | -t _s_e_c_o_n_d_s | -n _a_d_d_r_e_s_s | -N _a_d_d_r_e_s_s ]
 
 
-
-
    Output:
        [pair count] timestamp rtt [spt] [OWDref2mon OWDmon2ref]
 
 
 
 DESCRIPTION
-       spp provides frequently updated RTT estimates using IP traffic  already
-       present  in  the network. spp estimates the RTT between two measurement
-       points without requiring precise time synchronisation  between  points.
-       spp accurately estimates the RTT experienced by any application's traf-
-       fic without needing modifications to  the  application  itself  or  the
-       routers along the path.
+       Building on the ideas presented in [1] and [2], spp provides frequently
+       updated  RTT estimates using IP traffic already present in the network.
+       spp estimates the RTT between two measurement points without  requiring
+       precise  time  synchronisation between points. spp accurately estimates
+       the RTT experienced by any application's traffic without needing  modi-
+       fications to the application itself or the routers along the path.
 
-       spp  requires  a capture of traffic at both ends of the path that is to
-       be measured. From these captures spp  can  create  synthetic  pairs  of
-       packets  from  which RTT can be calculated. spp works with tcpdump/pcap
-       files previously captured at two points on a network, or alternatively,
-       live capture on local and/or remote interfaces may be used.
+       spp  requires a capture of traffic at both ends (measurement points) of
+       the path that is to be measured. From  these  captures  spp  identifies
+       pairs  of  packets, one packet in each direction, from which RTT can be
+       calculated. The reference point (REF) is where the round trip  is  con-
+       sidered  to  have  started from, with the monitor point (MON) being the
+       far end of the round trip. (For example, a ping might be considered  to
+       originate at REF while the ping target is MON.)
 
-       The  reference  point  is  where the trip is considered to have started
-       from, with the monitor point being the far end of the trip. To clarify,
-       when  using  ping,  you would execute the ping from the reference point
-       and the ping target would be the monitor point.
+       These  packet pairs are 'synthetic' in that the paired packets need not
+       have any particular relationship to each other,  except  that  one  was
+       seen  travelling  from REF to MON immediately before the other was seen
+       travelling from MON to REF.
+
+       spp works with tcpdump/pcap files previously captured at two points  on
+       a network, or alternatively, live capture on local and/or remote inter-
+       faces may be used.
+
 
 OPTIONS
    General Options:
@@ -67,10 +72,10 @@ OPTIONS
        -d     Max difference of timestamps in seconds allowed between matching
               packets.  This value should be greater than expected  RTT  (plus
               any  clock offset when not specifying a fixed offset with the -o
-              option).. (Default: 60)
+              option). (Default: 60)
 
        -G     Maximum number of packets that will be searched to match a  pair
-              before giving up (Default: 10000(pcap file) or 500(live))
+              before giving up (Default: 10000 [pcap file] or 500 [live])
 
        -v     Verbosity Level (Default: 0)
                   Determines information that is displayed on the console.
@@ -88,9 +93,11 @@ OPTIONS
 
 
    Source options:
-       -f     File to be read for the reference point (PCAP format)
+       -f     PCAP-format file of packets previously captured at the reference
+              point
 
-       -F     File to be read for the monitor point (PCAP format)
+       -F     PCAP-format  file  of packets previously captured at the monitor
+              point
 
        -i     Reference point live capture interface (Except for  when  acting
               as a slave - instead use -I)
@@ -157,7 +164,53 @@ OPTIONS
                 4096 Up to 20 bytes after IP header (limited by packet length)
 
               NOTE:  When NAT is use, source and destination IP address fields
-              will be omitted from hashes automatically.
+              will automatically be omitted from hashes.
+
+
+PACKET IDENTIFICATION
+       A crucial step in pairing packets is identifying each  packet  seen  at
+       REF  with  the  same packet seen at MON (separately in each direction).
+       SPP does this by generating a per-packet hash across a number of fields
+       in  the  IP  header, transport protocol header and/or payload. The '-#'
+       option controls what specific combination of fields are used to  gener-
+       ate the hash.
+
+       Reliable  disambiguation  of  packets requires hashing over fields that
+       vary from one packet to the next, yet are invariant between REF and MON
+       (not  altered by network devices along the path). Some problematic sce-
+       narios include NAT (where IP addresses are not invariant along a  path,
+       and  TCP/UDP  ports may also be altered) and TCP sequence number remap-
+       ping (observed being performed by certain 'security' middleboxes).
+
+       When SPP was first developed, the IP.ID  field  was  often  unique  for
+       every  IP  packet emitted by a sender, and could be relied on to disam-
+       biguate retransmissions of higher later segments. However, RFC 6864 has
+       formalised the notion that IP.ID need only be unique for fragments of a
+       larger IP packet.
+
+       The TCP Option bytes are useful for disambiguating TCP packets (includ-
+       ing  retransmissions)  where the underlying connections have negotiated
+       (and correctly use) the Time Stamp option. In such  cases,  retransmis-
+       sions will always differ by their TSval field.
+
+
+CLOCK SYNCHRONISATION
+       The SPP algorithm does not strictly require clocks at REF and MON to be
+       synchronised. Nevertheless, this SPP implementation applies a practical
+       limit  on how far forward and back in time it searches to match packets
+       captured at REF and MON monitoring points. By default, your REF and MON
+       clocks  ought  to  be  synchronised  to  within 60 seconds (this can be
+       altered with the '-d' option). If you find SPP is not generating  esti-
+       mates, it may be due to excessive offset between the REF and MON system
+       clocks.
+
+       If you know that your sources have a fixed time offset,  SPP  can  take
+       this  into  account. The known offset can be specified in seconds using
+       the
+
+       In addition, the option '-d' can be used to alter the maximum tolerance
+       (in  seconds) for clocks that are out of sync. See [2] for more details
+       on 'T delta'.
 
 
 EXAMPLES
@@ -233,8 +286,9 @@ BUGS
        Live remote capture has not been tested much and may have bugs.
 
 AUTHOR
-       Amiel Heyde <amiel at swin dot edu dot au> Centre for Advanced Internet
-       Architectures, Swinburne University of Technology, Melbourne, Australia
+       Original  implementation  by Amiel Heyde <amiel at swin dot edu dot au>
+       Centre for Advanced Internet  Architectures,  Swinburne  University  of
+       Technology, Melbourne, Australia.
 
 
 CONTRIBUTORS
@@ -249,9 +303,22 @@ CONTRIBUTORS
        Advanced  Internet  Architectures,  Swinburne University of Technology,
        Melbourne, Australia
 
+
+REFERENCES
+       [1] S. Zander, G. Armitage, T. Nguyen,  L.  Mark,  B.  Tyo,  "Minimally
+       Intrusive  Round  Trip Time Measurements Using Synthetic Packet-Pairs,"
+       CAIA       Technical       Report       060707A,       July       2006.
+       http://caia.swin.edu.au/reports/060707A/CAIA-TR-060707A.pdf
+
+       [2]  S.  Zander,  G. Armitage, "Minimally-Intrusive Frequent Round Trip
+       Time Measurements Using  Synthetic  Packet-Pairs  -  Extended  Report",
+       CAIA       Technical       Report       130730A,       July       2013.
+       http://caia.swin.edu.au/reports/130730A/CAIA-TR-130730A.pdf
+
+
 SEE ALSO
        pcap(3), tcpdump(8)
 
 
 
-FreeBSD                            FEB 2018                             SPP(1)
+FreeBSD                            MAR 2018                             SPP(1)

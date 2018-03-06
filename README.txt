@@ -34,16 +34,21 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
         RTT is the round trip time that Target Traffic experiences between two 
         Measurement Points.
 
-        A Measurement Point is an interface on which Target Traffic is observed.
-
-        Target Traffic consists of a user nominated subset of traffic that flows
-        past both Measurement Points. (At present, target traffic is limited
-        to any traffic between two specified IP addresses)
-
-        Reference Point - Measurement Point that is local to the user.
-
-        Monitor Point - Measurement Point that is remote from the user's 
-        perspective.
+        A Measurement Point is an interface (or tap on the network) at which
+        Target Traffic is observed. The two measurement points are REF (reference)
+        and MON (monitor).
+        
+        Target Traffic consists of a user nominated subset of traffic made up of
+        packets passing REF on the way towards MON, and packets flowing past MON
+        on the way towards REF.
+        
+        SPP identifies target traffic using two IP addresses. The REF point IP address
+        is the source address of target traffic packets heading in the REF to MON
+        direction, while the MON point IP address represents a source of target
+        traffic packets heading in the MON to REF direction.
+        
+        Packet pairs are constructed by pairing up a packet seen heading from REF
+        to MON with the next packet seen heading the other way from MON to REF.
 
 
   4. Operation
@@ -103,7 +108,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
         -N Natted IP address of the monitor point
         -s Put into slave mode and send SSF to specified host
         -v Verbosity Level - see man page
-        -d T Delta Maximum (seconds) - see Readme (default: 60)
+        -d T Delta Maximum (seconds) (default: 60)
         -o Offset in seconds of the monitor point with respect to the reference point
 	-G Search interval in number of packets (default: 10000(file)/500(live))
 
@@ -128,6 +133,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
         -# <code> (default: 63)
         The # option maybe used to set which fields are used in the packet matching process.
         The value of <code> is the total of all the required field IDs as listed below:
+        
         IP fields:
                         1 Source Address
                         2 Destination Address
@@ -142,7 +148,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
                         256 Data offset, flags, window size
                         512 Checksum, urgent pointer
                         8192 Up to 12 bytes of TCP payload (limited by packet length)
-                        16384 Up to 12 bytes of TCP Options (if present)
+                        16384 All TCP Options bytes (if present)
         UDP Fields:
                         1024 Length, checksum
                         2048 Up to 12 bytes UDP data (limited by packet length)
@@ -152,21 +158,50 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
 
         NOTE: IP addresses will not be used for hashing when NAT is in use.
 
-  6. Clock Synchronisation
+  6. Packet identification and clocks 
+  
+   6.1 Packet identification
+   
+        A crucial step in pairing packets is identifying each packet seen at REF
+        with the same packet seen at MON (separately in each direction). SPP does
+        this by generating a per-packet hash across a number of fields in the
+        IP header, transport protocol header and/or payload. The '-#' option
+        controls what specific combination of fields are used to generate the hash.
+        
+        Reliable disambiguation of packets requires hashing over fields that
+        vary from one packet to the next, yet are invariant between REF and MON
+        (not altered by network devices along the path). Some problematic scenarios
+        include NAT (where IP addresses are not invariant along a path, and
+        TCP/UDP ports may also be altered) and TCP sequence number remapping
+        (observed being performed by certain 'security' middleboxes).
+        
+        When SPP was first developed, the IP.ID field was often unique for
+        every IP packet emitted by a sender, and could be relied on to disambiguate
+        retransmissions of higher later segments. However, RFC 6864 has formalised
+        the notion that IP.ID need only be unique for fragments of a larger IP packet.
+        
+        The TCP Option bytes are useful for disambiguating TCP packets (including
+        retransmissions) where the underlying connections have negotiated (and
+        correctly use) the Time Stamp option. In such cases, retransmissions will
+        always differ by their TSval field.
 
-        Machines used for passive monitoring should have synchronised 
-        clocks (to within a few seconds). If you find SPP is not generating 
-        estimates, it is most likely due to system clocks which are outside 
-        this range.
+   6.2 Clock Synchronisation
 
-        If you know that your sources have a fixed time offset, SPP can take the 
-        offset into account. The offset can be specified in seconds using the
-        -o option, where the value refers to the offset at the monitor point
-        with respect to the reference point.
+        The SPP algorithm does not strictly require clocks at REF and MON to be
+        synchronised. Nevertheless, this SPP implementation applies a practical
+        limit on how far forward and back in time it searches to match packets
+        captured at REF and MON monitoring points. By default, your REF and MON
+        clocks ought to be synchronised to within 60 seconds (this can be altered
+        with the '-d' option). If you find SPP is not generating  estimates, it
+        may be due to excessive offset between the REF and MON system clocks.
 
-        In addition, the option '-d' can be used to specify the maximum 
-        tolerance (in seconds) for clocks that are out of sync. See link in the
-        References section for details on 'T delta'.
+        If you know that your sources have a fixed time offset, SPP can take this 
+        into account. The known offset can be specified in seconds using the
+        '-o' option, where the value refers to the offset at MON relative to REF.
+
+        In addition, the option '-d' can be used to alter the maximum tolerance
+        (in seconds) for clocks that are out of sync. See [2] for more details
+        on 'T delta'.
 
   7. Usage Examples
 
@@ -174,11 +209,12 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
         examples below and visit http://www.caia.swin.edu.au/tools/spp/ to view 
         more comprehensive usage information with diagrams.
 
-        The examples 5.1 to 5.4 assume the measurement points reside on the
-        hosts generating the target traffic. Examples 5.5 and 5.6 show
+        The examples 7.1 to 7.4 assume the measurement points reside on the
+        hosts generating the target traffic. Examples 7.5 and 7.6 show
         examples where the measurement points are on separate hosts.
 
    7.1 From files
+   
        The  IP  at  the  reference point is 10.0.0.1 and the IP at the monitor
        point is 10.0.0.2. The files /data/ref.pcap and /data/mon.pcap  contain
        data observed at the reference and monitor points respectively. Note
@@ -189,6 +225,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
 
 
    7.2 Local live observation
+   
        Processing  RTT  in rear real time from two local interfaces. This would
        be useful in a lab environment  when  testing  equipment  or  networks.
        There are two local interfaces (em0 and em1) with IP addresses 10.0.1.1
@@ -198,6 +235,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
 
 
    7.3 Local/Remote with in band SSF transmission
+   
        Processing RTT in near real time from a local interface at the reference
        point and remote interface at the monitor point. This example uses in
        band SSF transmission.
@@ -217,6 +255,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
 
 
    7.4 Local/Remote with out of band SSF transmission
+   
        Processing RTT in near real time from a local interface at the reference
        point and remote interface at the monitor point. This example uses out
        of band SSF transmission.
@@ -235,6 +274,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
        spp -s 192.168.0.1 -a 10.0.0.1 -I bge0 -A 10.0.0.2
 
    7.5 From files (With target traffic hosts separate from measurement points)
+   
        The  IP  at  the  reference point is 10.0.0.1 and the IP at the monitor
        point is 10.0.0.2. The files /data/ref.pcap and /data/mon.pcap  contain
        data observed at the reference and monitor points respectively.
@@ -244,6 +284,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
        spp -a 10.1.0.1 -A 10.2.0.1 -f /data/ref.pcap -F /data/mon.pcap -cp
 
    7.6 Local/Remote (Target traffic hosts separate from measurement points)
+   
        Processing RTT in near real time from a local interface at the reference
        point and remote interface at the monitor point. Target traffic was
        generated by the hosts 10.1.0.1 and 10.2.0.1 which lie on networks either

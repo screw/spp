@@ -1,5 +1,4 @@
 Future work for SPP
-- Note IP.ID no longer useful for de-duplication (RFC 6864)
 - Add support for arbitrary pcap filter strings
 - Further testing and stability improvements 
 - Improve timeouts / T Delta functionality

@@ -4,7 +4,7 @@
 .\" then run:
 .\"  groff -man -Tascii -c -P -b spp.1
 .\"
-.TH SPP 1 "FEB 2018" FreeBSD "User Manuals"
+.TH SPP 1 "MAR 2018" FreeBSD "User Manuals"
 .SH NAME
 spp \- calculates round trip time (RTT) from pcap files or live traffic capture
 .SH SYNOPSIS
@@ -72,29 +72,33 @@ spp \- calculates round trip time (RTT) from pcap files or live traffic capture
 .I address
 .B ]
 
-
-
 .SS Output:
 .B [pair count] timestamp rtt [spt] [OWDref2mon OWDmon2ref]
 
 
 .SH DESCRIPTION
+Building on the ideas presented in [1] and [2],
 .B spp
 provides frequently updated RTT
-estimates using IP traffic already present in the network. spp 
+estimates using IP traffic already present in the network.
+.B spp 
 estimates the RTT between two measurement points without
 requiring precise time synchronisation between points. spp 
 accurately estimates the RTT experienced by any application's
 traffic without needing modifications to the application itself or
 the routers along the path.
 
-spp requires a capture of traffic at both ends of the path that is to be measured. From these captures spp can create synthetic pairs of packets from which RTT can be calculated. spp works with tcpdump/pcap files previously captured at two points on a network, or alternatively, live capture on local and/or remote interfaces may be used.
+.B spp
+requires a capture of traffic at both ends (measurement points) of the path that is to be measured. From these captures spp identifies pairs of packets, one packet in each direction, from which RTT can be calculated. The
+.B reference point
+(REF) is where the round trip is considered to have started from, with the 
+.B monitor point
+(MON) being the far end of the round trip. (For example, a ping might be considered to originate at REF while the ping target is MON.)
 
-The
-.B reference point 
-is where the trip is considered to have started from, with the 
-.B monitor point 
-being the far end of the trip. To clarify, when using ping, you would execute the ping from the reference point and the ping target would be the monitor point.
+These packet pairs are 'synthetic' in that the paired packets need not have any particular relationship to each other, except that one was seen travelling from REF to MON immediately before the other was seen travelling from MON to REF.
+
+spp works with tcpdump/pcap files previously captured at two points on a network, or alternatively, live capture on local and/or remote interfaces may be used.
+
 .SH OPTIONS
 .SS General Options:
 .IP -a 
@@ -111,9 +115,9 @@ Put into slave mode and send to the master specified
 Offset in seconds of clocks at the monitor point with respect to the reference point.
 .IP -d seconds
 Max difference of timestamps in seconds allowed between matching packets. 
-This value should be greater than expected RTT (plus any clock offset when not specifying a fixed offset with the -o option).. (Default: 60)
+This value should be greater than expected RTT (plus any clock offset when not specifying a fixed offset with the -o option). (Default: 60)
 .IP -G
-Maximum number of packets that will be searched to match a pair before giving up (Default: 10000(pcap file) or 500(live))
+Maximum number of packets that will be searched to match a pair before giving up (Default: 10000 [pcap file] or 500 [live])
 .IP -v
 Verbosity Level (Default: 0)
     Determines information that is displayed on the console.
@@ -131,9 +135,9 @@ Verbosity Level (Default: 0)
 
 .SS Source options:
 .IP -f 
-File to be read for the reference point (PCAP format)
+PCAP-format file of packets previously captured at the reference point
 .IP -F 
-File to be read for the monitor point (PCAP format)
+PCAP-format file of packets previously captured at the monitor point
 .IP -i 
 Reference point live capture interface (Except for when acting as a slave - instead use -I)
 .IP -I 
@@ -186,8 +190,51 @@ UDP Fields:
 Not UDP/TCP:
   4096 Up to 20 bytes after IP header (limited by packet length)
 
-NOTE: When NAT is use, source and destination IP address fields will be omitted from hashes automatically.
+NOTE: When NAT is use, source and destination IP address fields will automatically be omitted from hashes.
 
+.SH PACKET IDENTIFICATION
+
+A crucial step in pairing packets is identifying each packet seen at REF
+with the same packet seen at MON (separately in each direction). SPP does
+this by generating a per-packet hash across a number of fields in the
+IP header, transport protocol header and/or payload. The '-#' option
+controls what specific combination of fields are used to generate the hash.
+
+Reliable disambiguation of packets requires hashing over fields that
+vary from one packet to the next, yet are invariant between REF and MON
+(not altered by network devices along the path). Some problematic scenarios
+include NAT (where IP addresses are not invariant along a path, and
+TCP/UDP ports may also be altered) and TCP sequence number remapping
+(observed being performed by certain 'security' middleboxes).
+
+When SPP was first developed, the IP.ID field was often unique for
+every IP packet emitted by a sender, and could be relied on to disambiguate
+retransmissions of higher later segments. However, RFC 6864 has formalised
+the notion that IP.ID need only be unique for fragments of a larger IP packet.
+
+The TCP Option bytes are useful for disambiguating TCP packets (including
+retransmissions) where the underlying connections have negotiated (and
+correctly use) the Time Stamp option. In such cases, retransmissions will
+always differ by their TSval field.
+
+.SH CLOCK SYNCHRONISATION
+
+The SPP algorithm does not strictly require clocks at REF and MON to be
+synchronised. Nevertheless, this SPP implementation applies a practical
+limit on how far forward and back in time it searches to match packets
+captured at REF and MON monitoring points. By default, your REF and MON
+clocks ought to be synchronised to within 60 seconds (this can be altered
+with the '-d' option). If you find SPP is not generating  estimates, it
+may be due to excessive offset between the REF and MON system clocks.
+
+If you know that your sources have a fixed time offset, SPP can take this 
+into account. The known offset can be specified in seconds using the
+'-o' option, where the value refers to the offset at MON relative to REF.
+
+In addition, the option '-d' can be used to alter the maximum tolerance
+(in seconds) for clocks that are out of sync. See [2] for more details
+on 'T delta'.
+        
 .SH  EXAMPLES
 
 .SS 1. From pcap files
@@ -236,12 +283,18 @@ To the outside world, it appears to be 136.0.0.1
 .SH BUGS
 Live remote capture has not been tested much and may have bugs.
 .SH AUTHOR
-Amiel Heyde <amiel at swin dot edu dot au> Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia
+Original implementation by Amiel Heyde <amiel at swin dot edu dot au> Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia.
 
 .SH CONTRIBUTORS
 Software designed in collaboration with Grenville Armitage <garmitage at swin dot edu dot au> Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia 
 .P
 Original implementation extended and revised by David Hayes <dahayes at swin dot edu dot au>, Atwin O. Calchand <acalchand at swin dot edu dot au>, Christopher Holman, Sebastian Zander <szander at swin dot edu dot au>, Grenville Armitage <garmitage at swin dot edu dot au>, Centre for Advanced Internet Architectures, Swinburne University of Technology, Melbourne, Australia
+
+.SH REFERENCES
+[1] S. Zander, G. Armitage, T. Nguyen, L. Mark, B. Tyo, "Minimally Intrusive Round Trip Time Measurements Using Synthetic Packet-Pairs," CAIA Technical Report 060707A, July 2006.  http://caia.swin.edu.au/reports/060707A/CAIA-TR-060707A.pdf
+          
+[2] S. Zander, G. Armitage, "Minimally-Intrusive Frequent Round Trip Time Measurements Using Synthetic Packet-Pairs - Extended Report",           CAIA Technical Report 130730A, July 2013.  http://caia.swin.edu.au/reports/130730A/CAIA-TR-130730A.pdf
+
 .SH "SEE ALSO"
 .BR pcap (3),
 .BR tcpdump (8)
