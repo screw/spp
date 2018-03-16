@@ -130,7 +130,7 @@ int initialise() {
 void processArgs(int argc, char *argv[]){
   int user_set_max_packet_gap = 0;
   char c;
-  while ((c = getopt(argc, argv, "hg:o:O:d:v:t:l:G:s:a:A:n:N:f:F:i:I:r:R:#:pcmb")) != -1 ) {
+  while ((c = getopt(argc, argv, "hg:o:d:v:t:l:G:s:a:A:n:N:f:F:i:I:r:R:#:pcmbOP")) != -1 ) {
     switch (c) {
       case 'h': displayUsageInfo();
                 exit(0);
@@ -153,6 +153,8 @@ void processArgs(int argc, char *argv[]){
       case 'c': options |= output_pair_count; break;
       case 'm': options |= use_monitor_clock; break;
       case 'b': options |= use_firstpkt_time; break; //added by David Hayes
+      case 'O': options |= output_fakeowd; break;
+      case 'P': options |= use_pcap_filter; break;
       case 'a': inet_aton(optarg, (struct in_addr *) &addr[REF]); break;
       case 'A': inet_aton(optarg, (struct in_addr *) &addr[MON]); break;
       case 'n': inet_aton(optarg, (struct in_addr *) &nat_addr[REF]); break;
@@ -178,8 +180,6 @@ void processArgs(int argc, char *argv[]){
                 break;
       case 'o': sec_offset = atoi(optarg);
                 break;
-      case 'O': options |= output_fakeowd;
-                break;
       case '?':
              if (optopt == 'c')
                fprintf (stderr, "Option -%c requires an argument.\n", optopt);
@@ -190,7 +190,7 @@ void processArgs(int argc, char *argv[]){
                         "Unknown option character `\\x%x'.\n",
                         optopt);
              exit(-1);
-           default:
+      default:
              abort ();
     }
   }

@@ -143,23 +143,24 @@ PUBLIC void mpoint_load(monitor_point_t * mpoint, const mp_type_t type, const ch
  * */
 PUBLIC void mpoint_start(monitor_point_t * mpoint) {
 
- if(mpoint->type != remote) {
-    char filter_string[90];
-    char buf[8];
-    strcpy(filter_string, "host ");
-    strcat(filter_string, inet_ntoa(*(struct in_addr *)&addr[REF]));
-    if (nat_addr[0] == 0 && nat_addr[1] == 0)
-      strcat(filter_string, " and host ");
-    else //one of the ends has NAT
-      strcat(filter_string, " or host ");
-    strcat(filter_string, (char*)inet_ntoa(*(struct in_addr *)&addr[MON]));
-    strcat(filter_string, " and !icmp[icmptype]==3 and !port ");
-    sprintf(buf, "%d", PORT);
-    strcat(filter_string, buf);
-        if(verbosity & 32) printf("PCAP filter string: %s\n", filter_string);
-    setPcapFilter(mpoint, filter_string);
-  }
-
+ if(options & use_pcap_filter) {
+   if(mpoint->type != remote) {
+      char filter_string[90];
+      char buf[8];
+      strcpy(filter_string, "host ");
+      strcat(filter_string, inet_ntoa(*(struct in_addr *)&addr[REF]));
+      if (nat_addr[0] == 0 && nat_addr[1] == 0)
+        strcat(filter_string, " and host ");
+      else //one of the ends has NAT
+        strcat(filter_string, " or host ");
+      strcat(filter_string, (char*)inet_ntoa(*(struct in_addr *)&addr[MON]));
+      strcat(filter_string, " and !icmp[icmptype]==3 and !port ");
+      sprintf(buf, "%d", PORT);
+      strcat(filter_string, buf);
+          if(verbosity & 32) printf("PCAP filter string: %s\n", filter_string);
+      setPcapFilter(mpoint, filter_string);
+    }
+ }
   switch(mpoint->type) {
     case file:
     case live:
@@ -580,7 +581,9 @@ PUBLIC void removeOldInstances(monitor_point_t * mpoint, direction_t direction, 
 PRIVATE void setPcapFilter(monitor_point_t * mpoint, char * filter_string) {
   struct bpf_program bpf_prog;
   
-
+  /* Note: Using this filter implicitly limits us to DLT_EN10MB frames.
+   * (https://www.tcpdump.org/manpages/pcap-filter.7.html)
+   */
 
   if(pcap_compile(mpoint->dev, &bpf_prog, filter_string,0,1) == -1)
     printf("Error compiling BPF program: %s\n", pcap_geterr(mpoint->dev));

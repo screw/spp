@@ -72,8 +72,19 @@ typedef enum OPTIONS_TYPE {
      * offsets between REF and MON. This option is useful to track *relative*
      * changes in OWD in each direciton, rather than infer anything about absolute OWDs.
      * */
-    output_fakeowd = 512
+    output_fakeowd = 512,
     
+     /*
+     * When set: compile and activate a pcap filter rule such that only packets
+     * travelling between the nominated IP endpoints are passed to spp's processing loop.
+     * Pros: May improve performance.
+     * Cons: Implicitly limits us to seeing DLT_EN10MB frames, which precludes
+     * parsing .pcap files that contain other frame types recognised by instance.c:createInstance(),
+     * such as DLT_NULL or DLT_PPP frames.
+     * This flag is unset by default (for maximum versatility).
+     * */
+    use_pcap_filter = 1024
+
 } options_t;
 
 
