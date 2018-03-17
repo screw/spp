@@ -297,7 +297,7 @@ void displayUsageInfo(){
                 printf("\t-d T Delta Maximum (seconds) - see Readme (default: %d)\n", DELTA_T_MAX);
                 printf("\t-o Offset in seconds of the monitor point with respect to the reference point\n");
                 printf("\t-G Maximum number of packets that will be searched to match a pair before giving up (default: %d)\n", MAX_PACKET_GAP);
-                printf("\t-P Enable pcap/bpf filtering (only accept DLT_EN10B-framed packets where IP addresses match)\n\n");
+                printf("\t-P Enable pcap/bpf filtering (only accept DLT_EN10MB-framed packets where IP addresses match)\n\n");
 
                 printf("Source options:\n");
                 printf("\t-f File to be read for the reference point (PCAP format)\n");
