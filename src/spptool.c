@@ -279,10 +279,10 @@ void displayUsageInfo(){
                 printf("Synthetic Packet Pairing Tool - 0.3.7pre\n\n");
                 printf("Output: [pair count] timestamp rtt [spt] [OWDref2mon OWDmon2ref]\n\n");
                 printf("Offline file processing usage:\n");
-                printf("\tspp -a <IP address> -A <IP address> -f <file>  -F <file>\n\t\t[ -# <hashcode> -p | -c | -m | -O | -P ]\n\n");
+                printf("\tspp -a <IP address> -A <IP address> -f <file>  -F <file>\n\t\t[ -# <hashcode> |-p |-c|-m|-b|-O|-P]\n\n");
                 printf("Live measurement usage:\n");
                 printf("\tspp -a <IP address> -A <IP address> ( -i <interface> | -r <remote server address> )");
-                printf("\n\t\t( -I <interface> | -R <remote server address> )\n\t\t[ -# <hashcode> | -g usec | -p | -c | -m | -O | -P ]\n\n");
+                printf("\n\t\t( -I <interface> | -R <remote server address> )\n\t\t[ -# <hashcode> | -g usec |-p |-c|-m|-b|-O|-P]\n\n");
                 printf("Remote slave usage:\n");
                 printf("\tspp -a <IP address> -A <IP address> -S <master address> -I <interface> \n\t\t");
                 printf("[ -# <hashcode> | -g usec | -l no.bytes | -t seconds]\n\n");
