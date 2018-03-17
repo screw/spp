@@ -276,13 +276,13 @@ void sigintproc() {
   //exit(1);
 }
 void displayUsageInfo(){
-                printf("Synthetic Packet Pairing Tool - 0.3.7\n\n");
+                printf("Synthetic Packet Pairing Tool - 0.3.7pre\n\n");
                 printf("Output: [pair count] timestamp rtt [spt] [OWDref2mon OWDmon2ref]\n\n");
                 printf("Offline file processing usage:\n");
-                printf("\tspp -a <IP address> -A <IP address> -f <file>  -F <file>\n\t\t[ -# <hashcode> -p | -c | -m |  ]\n\n");
+                printf("\tspp -a <IP address> -A <IP address> -f <file>  -F <file>\n\t\t[ -# <hashcode> -p | -c | -m | -O | -P ]\n\n");
                 printf("Live measurement usage:\n");
                 printf("\tspp -a <IP address> -A <IP address> ( -i <interface> | -r <remote server address> )");
-                printf("\n\t\t( -I <interface> | -R <remote server address> )\n\t\t[ -# <hashcode> | -g usec | -p | -c | -m ]\n\n");
+                printf("\n\t\t( -I <interface> | -R <remote server address> )\n\t\t[ -# <hashcode> | -g usec | -p | -c | -m | -O | -P ]\n\n");
                 printf("Remote slave usage:\n");
                 printf("\tspp -a <IP address> -A <IP address> -S <master address> -I <interface> \n\t\t");
                 printf("[ -# <hashcode> | -g usec | -l no.bytes | -t seconds]\n\n");
@@ -296,7 +296,8 @@ void displayUsageInfo(){
                 printf("\t-v Verbosity Level - see man page\n");
                 printf("\t-d T Delta Maximum (seconds) - see Readme (default: %d)\n", DELTA_T_MAX);
                 printf("\t-o Offset in seconds of the monitor point with respect to the reference point\n");
-                printf("\t-G Maximum number of packets that will be searched to match a pair before giving up (default: %d)\n\n", MAX_PACKET_GAP);
+                printf("\t-G Maximum number of packets that will be searched to match a pair before giving up (default: %d)\n", MAX_PACKET_GAP);
+                printf("\t-P Enable pcap/bpf filtering (only accept DLT_EN10B-framed packets where IP addresses match)\n\n");
 
                 printf("Source options:\n");
                 printf("\t-f File to be read for the reference point (PCAP format)\n");
@@ -317,7 +318,7 @@ void displayUsageInfo(){
                 printf("\t-O Append 'fake' (uncorrected) OWD in each direction to each RTT line, [OWDref2mon OWDmon2ref]\n\n");
 
                 printf("Packet Matching Options:\n");
-                printf("\t-# <code> (default: 63)\n");
+                printf("\t-# <code> (default: %d)\n", hash_fields);
                 printf("\tThe # option maybe used to set which fields are used in the packet matching process.\n");
                 printf("\tThe value of <code> is the total of all the required field IDs as listed below:\n");
                 printf("\tIP fields:\n\t\t\t1 Source Address\n\t\t\t2 Destination Address\n\t\t\t4 Protocol\n\t\t\t8 Identification\n");
