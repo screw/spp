@@ -111,7 +111,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
         -d T Delta Maximum (seconds) (default: 60)
         -o Offset in seconds of the monitor point with respect to the reference point
 	-G Search interval in number of packets (default: 10000(file)/500(live))
-        -P Enable pcap/bpf filtering (only accept DLT_EN10B-framed packets where IP addresses match)
+        -P Enable pcap/bpf filtering (only accept DLT_EN10MB-framed packets where IP addresses match)
 
        Source options:
         -f File to be read for the reference point (PCAP format)
