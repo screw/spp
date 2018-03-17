@@ -9,13 +9,13 @@ NAME
 SYNOPSIS
    File processing:
        spp -a _a_d_d_r_e_s_s -A _a_d_d_r_e_s_s -f _f_i_l_e -F _f_i_l_e [-# _h_a_s_h_c_o_d_e | -n  _a_d_d_r_e_s_s  |
-       -N _a_d_d_r_e_s_s |-p|-c|-m|-b]
+       -N _a_d_d_r_e_s_s |-p|-c|-m|-b|-O|-P]
 
 
    Live processing master:
        spp -a _a_d_d_r_e_s_s -A _a_d_d_r_e_s_s (-i _i_n_t_e_r_f_a_c_e | -r _h_o_s_t ) ( -I _i_n_t_e_r_f_a_c_e | -R
        _s_l_a_v_e___h_o_s_t  )  [-#  _h_a_s_h_c_o_d_e  |-g  _u_s_e_c  |  -n  _a_d_d_r_e_s_s  |  -N  _a_d_d_r_e_s_s
-       |-p|-c|-m|-b]
+       |-p|-c|-m|-b|-O|-P]
 
 
    Remote slave:
@@ -77,6 +77,11 @@ OPTIONS
        -G     Maximum number of packets that will be searched to match a  pair
               before giving up (Default: 10000 [pcap file] or 500 [live])
 
+       -P     Enable  pcap/bpf filtering of packets passed into user-space for
+              SPP processing. This filters out any packets not using the spec-
+              ified IP addresses, and any pcap frames that are not DLT_EN10MB.
+              (Disabled by default.)
+
        -v     Verbosity Level (Default: 0)
                   Determines information that is displayed on the console.
                   The verbosity level is the total of the IDs of each required
@@ -96,13 +101,13 @@ OPTIONS
        -f     PCAP-format file of packets previously captured at the reference
               point
 
-       -F     PCAP-format  file  of packets previously captured at the monitor
+       -F     PCAP-format file of packets previously captured at  the  monitor
               point
 
-       -i     Reference point live capture interface (Except for  when  acting
+       -i     Reference  point  live capture interface (Except for when acting
               as a slave - instead use -I)
 
-       -I     Monitor  point  live  capture interface (Also used for reference
+       -I     Monitor point live capture interface (Also  used  for  reference
               point acting as a slave)
 
    Network options:
@@ -110,7 +115,7 @@ OPTIONS
 
        -g     Granularity of timestamps in microseconds (Default: 100)
 
-       -t     Network update timeout - Maximum time in seconds  between  slave
+       -t     Network  update  timeout - Maximum time in seconds between slave
               sending spp sample frames to the master (Default: 1)
 
    Output options:
@@ -120,22 +125,22 @@ OPTIONS
        -c     Output 'Pair Count' (Running total of pairs the program has gen-
               erated)
 
-       -m     Calculate  timestamps  from  monitor point clock rather than the
-              reference point clock (Output timestamps are the average of  the
+       -m     Calculate timestamps from monitor point clock  rather  than  the
+              reference  point clock (Output timestamps are the average of the
               packet's timestamps that were combined to make the pair)
 
-       -b     Set  the timestamp to the time that the first packet of the pair
+       -b     Set the timestamp to the time that the first packet of the  pair
               was first seen. (This is useful when comparing spp output to the
               raw trace files).
 
-       -O     Append  'fake'  (uncorrected)  OWD in each direction to each RTT
-              line,  [OWDref2mon  OWDmon2ref].  The  (unknown)  clock   offset
-              between  REF  and MON is not taken into account, so this is only
+       -O     Append 'fake' (uncorrected) OWD in each direction  to  each  RTT
+              line,   [OWDref2mon  OWDmon2ref].  The  (unknown)  clock  offset
+              between REF and MON is not taken into account, so this  is  only
               useful to track *relative* changes in OWD, not absolute OWD.
 
    Packet Matching Options:
-       -#     The # option maybe used to set which  fields  are  used  in  the
-              packet  matching  process (Default: 63).  The value of <code> is
+       -#     The  #  option  maybe  used  to set which fields are used in the
+              packet matching process (Default: 63).  The value of  <code>  is
               the total of all the required field IDs as listed below:
 
               IP fields:
@@ -163,35 +168,46 @@ OPTIONS
               Not UDP/TCP:
                 4096 Up to 20 bytes after IP header (limited by packet length)
 
-              NOTE:  When NAT is use, source and destination IP address fields
+              NOTE: When NAT is use, source and destination IP address  fields
               will automatically be omitted from hashes.
 
 
 PACKET IDENTIFICATION
-       A crucial step in pairing packets is identifying each  packet  seen  at
-       REF  with  the  same packet seen at MON (separately in each direction).
+       A  crucial  step  in pairing packets is identifying each packet seen at
+       REF with the same packet seen at MON (separately  in  each  direction).
        SPP does this by generating a per-packet hash across a number of fields
-       in  the  IP  header, transport protocol header and/or payload. The '-#'
-       option controls what specific combination of fields are used to  gener-
+       in the IP header, transport protocol header and/or  payload.  The  '-#'
+       option  controls what specific combination of fields are used to gener-
        ate the hash.
 
-       Reliable  disambiguation  of  packets requires hashing over fields that
+       Reliable disambiguation of packets requires hashing  over  fields  that
        vary from one packet to the next, yet are invariant between REF and MON
-       (not  altered by network devices along the path). Some problematic sce-
-       narios include NAT (where IP addresses are not invariant along a  path,
-       and  TCP/UDP  ports may also be altered) and TCP sequence number remap-
+       (not altered by network devices along the path). Some problematic  sce-
+       narios  include NAT (where IP addresses are not invariant along a path,
+       and TCP/UDP ports may also be altered) and TCP sequence  number  remap-
        ping (observed being performed by certain 'security' middleboxes).
 
-       When SPP was first developed, the IP.ID  field  was  often  unique  for
-       every  IP  packet emitted by a sender, and could be relied on to disam-
+       When  SPP  was  first  developed,  the IP.ID field was often unique for
+       every IP packet emitted by a sender, and could be relied on  to  disam-
        biguate retransmissions of higher later segments. However, RFC 6864 has
        formalised the notion that IP.ID need only be unique for fragments of a
        larger IP packet.
 
        The TCP Option bytes are useful for disambiguating TCP packets (includ-
-       ing  retransmissions)  where the underlying connections have negotiated
-       (and correctly use) the Time Stamp option. In such  cases,  retransmis-
+       ing retransmissions) where the underlying connections  have  negotiated
+       (and  correctly  use) the Time Stamp option. In such cases, retransmis-
        sions will always differ by their TSval field.
+
+       If you find spp is generating implausibly high RTTs from time  to  time
+       (such  as  when the hash fails to disambiguate a retransmitted TCP seg-
+       ment at MON from its orignal seen at REF), use a custom "-# <hashcode>"
+       to hash over additional fields.
+
+       If  you  find  spp  is  not  generating RTT estimates, use a custom "-#
+       <hashcode>" to hash over fewer fields. (For example,  don't  hash  over
+       TCP  sequence  or  acknowledgement numbers if a middle-box is rewriting
+       these fields mid-path. Otherwise spp will fail to match a  packet  seen
+       at REF with the same packet seen at MON.)
 
 
 CLOCK SYNCHRONISATION

@@ -24,7 +24,7 @@ spp \- calculates round trip time (RTT) from pcap files or live traffic capture
 .I address
 .B | -N 
 .I address
-.B |-p|-c|-m|-b]
+.B |-p|-c|-m|-b|-O|-P]
 
 .SS Live processing master:
 .B spp -a 
@@ -47,7 +47,7 @@ spp \- calculates round trip time (RTT) from pcap files or live traffic capture
 .I address
 .B | -N 
 .I address
-.B |-p|-c|-m|-b]
+.B |-p|-c|-m|-b|-O|-P]
 
 .SS Remote slave:
 .B spp -a
@@ -118,6 +118,9 @@ Max difference of timestamps in seconds allowed between matching packets.
 This value should be greater than expected RTT (plus any clock offset when not specifying a fixed offset with the -o option). (Default: 60)
 .IP -G
 Maximum number of packets that will be searched to match a pair before giving up (Default: 10000 [pcap file] or 500 [live])
+.IP -P
+Enable pcap/bpf filtering of packets passed into user-space for SPP processing. This filters out any packets not
+using the specified IP addresses, and any pcap frames that are not DLT_EN10MB. (Disabled by default.)
 .IP -v
 Verbosity Level (Default: 0)
     Determines information that is displayed on the console.
@@ -216,6 +219,15 @@ The TCP Option bytes are useful for disambiguating TCP packets (including
 retransmissions) where the underlying connections have negotiated (and
 correctly use) the Time Stamp option. In such cases, retransmissions will
 always differ by their TSval field.
+
+If you find spp is generating implausibly high RTTs from time to time (such as
+when the hash fails to disambiguate a retransmitted TCP segment at MON from its
+orignal seen at REF), use a custom "-# <hashcode>" to hash over additional fields.
+
+If you find spp is not generating RTT estimates, use a custom "-# <hashcode>" to
+hash over fewer fields. (For example, don't hash over TCP sequence or acknowledgement
+numbers if a middle-box is rewriting these fields mid-path. Otherwise spp will
+fail to match a packet seen at REF with the same packet seen at MON.)
 
 .SH CLOCK SYNCHRONISATION
 
