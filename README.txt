@@ -89,16 +89,16 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
   5. SPP Command Syntax and Options
 
         USAGE: File processing:
-        spp -a address -A address -f file -F file [-# hashcode |-p|-c|-m]
+        spp -a address -A address -f file -F file [-# <hashcode> |-p|-c|-m|-b|-O|-P]
 
 
         USAGE: Live processing master:
         spp -a address -A address (-i interface | -r host )
-        ( -I interface | -R slave_host ) [-# hashcode |-g usec |-p|-c|-m]
+        ( -I interface | -R slave_host ) [-# <hashcode> |-g usec |-p|-c|-m|-b|-O|-P]
 
         USAGE: Remote slave:
         spp  -a  address -A address -s master_host -I interface 
-        [ -# hashcode | -g usec | -l no.bytes | -t seconds ]
+        [ -# <hashcode> | -g usec | -l no.bytes | -t seconds ]
 
 
       General Options:
@@ -111,6 +111,7 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
         -d T Delta Maximum (seconds) (default: 60)
         -o Offset in seconds of the monitor point with respect to the reference point
 	-G Search interval in number of packets (default: 10000(file)/500(live))
+        -P Enable pcap/bpf filtering (only accept DLT_EN10B-framed packets where IP addresses match)
 
        Source options:
         -f File to be read for the reference point (PCAP format)
@@ -130,9 +131,9 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
         -b Use the timestamp of the first packet in the pair for the pair timestamp
 
         Packet Matching Options:
-        -# <code> (default: 63)
+        -# <hashcode> (default: 63)
         The # option maybe used to set which fields are used in the packet matching process.
-        The value of <code> is the total of all the required field IDs as listed below:
+        The value of <hashcode> is the total of all the required field IDs as listed below:
         
         IP fields:
                         1 Source Address
@@ -184,7 +185,16 @@ SPP - Synthetic Packet Pairs - 0.3.X - Readme
         retransmissions) where the underlying connections have negotiated (and
         correctly use) the Time Stamp option. In such cases, retransmissions will
         always differ by their TSval field.
+        
+        If you find spp is generating implausibly high RTTs from time to time (such as
+        when the hash fails to disambiguate a retransmitted TCP segment at MON from its
+        orignal seen at REF), use a custom "-# <hashcode>" to hash over additional fields.
 
+        If you find spp is not generating RTT estimates, use a custom "-# <hashcode>" to
+        hash over fewer fields. (For example, don't hash over TCP sequence or acknowledgement
+        numbers if a middle-box is rewriting these fields mid-path. Otherwise spp will
+        fail to match a packet seen at REF with the same packet seen at MON.)
+        
    6.2 Clock Synchronisation
 
         The SPP algorithm does not strictly require clocks at REF and MON to be
